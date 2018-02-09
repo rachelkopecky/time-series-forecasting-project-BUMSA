@@ -1,0 +1,8 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+
+#Ignore all data type files to prevent raw information in the public domain
+*.csv
+*.xlsx
