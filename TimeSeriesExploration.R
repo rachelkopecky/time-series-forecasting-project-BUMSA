@@ -12,7 +12,7 @@
 
 #   Load Required Packages and Files  
 #   Check that necessary packages are installed
-packages <- c("tidyverse", "lubridate", "xlsx")
+packages <- c("tidyverse", "lubridate", "zoo", "forecast", "xts", "tibbletime")
 new.packages <- packages[!(packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages)
 
@@ -26,3 +26,22 @@ outbound <- read.csv("Outbound Data.csv")
 inbound$Date <- mdy(inbound$Date)
 outbound$Date <- mdy(outbound$Date)
 
+#Convert Dollars and Wage to numeric
+inbound$Dollars <- as.numeric(sub('\\$','',as.character(inbound$Dollars))) 
+#NA introduced on ID = 170103129 because there is a comma in the number - NEED TO FIX
+outbound$Dollars <- as.numeric(sub('\\$','',as.character(outbound$Dollars)))
+inbound$Wage <- as.numeric(sub('\\$','',as.character(inbound$Wage))) 
+outbound$Dollars <- as.numeric(sub('\\$','',as.character(outbound$Wage))) 
+
+#Use tibble time to convert the data frames to time series
+inbound <- as_tbl_time(inbound, Date)
+outbound <- as_tbl_time(outbound, Date)
+
+#Aggregate to location, task and day level to first plot
+inbound_summary <- inbound %>% 
+        dplyr::arrange(Report.Location, Etime.Labor.Task, Date) %>% 
+        dplyr::mutate(date = collapse_index(Date, "monthly")) %>% 
+        dplyr::group_by(Report.Location, Etime.Labor.Task, Date, add = TRUE) %>% 
+        dplyr::summarise(ttl_hrs = sum(Hours), 
+                         ttl_pay = sum(Dollars), 
+                         median_wage = median(Wage))
