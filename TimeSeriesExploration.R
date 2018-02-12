@@ -26,9 +26,12 @@ outbound <- read.csv("Outbound Data.csv")
 inbound$Date <- mdy(inbound$Date)
 outbound$Date <- mdy(outbound$Date)
 
+#correction for comma in a Dollars field
+inbound$Dollars <- str_replace(inbound$Dollars, ',', "")
+outbound$Dollars <- str_replace(outbound$Dollars, ',', "")
+
 #Convert Dollars and Wage to numeric
 inbound$Dollars <- as.numeric(sub('\\$','',as.character(inbound$Dollars))) 
-#NA introduced on ID = 170103129 because there is a comma in the number - NEED TO FIX
 outbound$Dollars <- as.numeric(sub('\\$','',as.character(outbound$Dollars)))
 inbound$Wage <- as.numeric(sub('\\$','',as.character(inbound$Wage))) 
 outbound$Dollars <- as.numeric(sub('\\$','',as.character(outbound$Wage))) 
