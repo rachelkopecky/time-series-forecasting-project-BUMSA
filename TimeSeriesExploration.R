@@ -12,7 +12,7 @@
 
 #   Load Required Packages and Files  
 #   Check that necessary packages are installed
-packages <- c("tidyverse", "lubridate", "zoo", "forecast", "xts", "tibbletime")
+packages <- c("tidyverse", "lubridate", "forecast", "tibbletime", "ggplot2", "ggthemes")
 new.packages <- packages[!(packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages)
 
@@ -34,17 +34,36 @@ outbound$Dollars <- str_replace(outbound$Dollars, ',', "")
 inbound$Dollars <- as.numeric(sub('\\$','',as.character(inbound$Dollars))) 
 outbound$Dollars <- as.numeric(sub('\\$','',as.character(outbound$Dollars)))
 inbound$Wage <- as.numeric(sub('\\$','',as.character(inbound$Wage))) 
-outbound$Dollars <- as.numeric(sub('\\$','',as.character(outbound$Wage))) 
+outbound$Dollars <- as.numeric(sub('\\$','',as.character(outbound$Wage)))
+
+#Order by Date
+inbound <- inbound[order(inbound$Date), ]
+outbound <- outbound[order(outbound$Date), ]
 
 #Use tibble time to convert the data frames to time series
 inbound <- as_tbl_time(inbound, Date)
 outbound <- as_tbl_time(outbound, Date)
 
-#Aggregate to location, task and day level to first plot
+#Aggregate to location and day level to first plot
 inbound_summary <- inbound %>% 
-        dplyr::arrange(Report.Location, Etime.Labor.Task, Date) %>% 
+        dplyr::arrange(Report.Location, Date) %>% 
         dplyr::mutate(date = collapse_index(Date, "monthly")) %>% 
-        dplyr::group_by(Report.Location, Etime.Labor.Task, Date, add = TRUE) %>% 
+        dplyr::group_by(Report.Location, Date, add = TRUE) %>% 
         dplyr::summarise(ttl_hrs = sum(Hours), 
                          ttl_pay = sum(Dollars), 
                          median_wage = median(Wage))
+inbound_summary %>% 
+        ggplot(aes(Date, 
+                   ttl_pay)) +
+        geom_line(aes(color = Report.Location)) +
+        scale_y_continuous(labels = scales::dollar) +
+        theme_tufte() +
+        ggtitle("Total Wages by Day") +
+        theme(axis.title.x = element_blank())
+
+summary(inbound_summary)
+#Might be best to "IC - Finance - Lou" locations since there are very few entries
+
+#Need to decompose and plot
+#Need to develop a forecast for it
+#Aggregate at other periods like day of week?
