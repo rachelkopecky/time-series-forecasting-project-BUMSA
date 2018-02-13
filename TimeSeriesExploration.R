@@ -67,7 +67,6 @@ summary(inbound_summary)
 #Might be best to remove "IC - Finance - Lou" locations since there are very few entries
 
 #Need to decompose and plot
-# inbound_summary$Date <- as.POSIXct(inbound_summary$Date, format = "%Y-%m-%d") Do we need to convert to POSIXct object?
 inbound_summary_test <- inbound_summary %>%
   filter(Report.Location == "LOU")  %>% 
   ungroup() %>% 
@@ -83,8 +82,8 @@ inbound_summary_ts <- ts(data = inbound_summary_test, start = c(2015,1), end = c
 inbound_summary_ts_pay <- ts(data = inbound_summary_test_pay, start = c(2015,1), end = c(2017,12), frequency = 12)
 
 # str(inbound_summary_ts)
-plot(decompose(inbound_summary_ts_hrs))
-plot(decompose(inbound_summary_ts_hrs, type = "multiplicative"))
+plot(decompose(inbound_summary_ts))
+plot(decompose(inbound_summary_ts, type = "multiplicative"))
 
 plot(decompose(inbound_summary_ts_pay))
 plot(decompose(inbound_summary_ts_pay, type = "multiplicative"))
