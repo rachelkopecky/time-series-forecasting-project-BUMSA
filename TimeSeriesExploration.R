@@ -41,17 +41,20 @@ inbound <- inbound[order(inbound$Date), ]
 outbound <- outbound[order(outbound$Date), ]
 
 #Use tibble time to convert the data frames to time series
-inbound <- as_tbl_time(inbound, Date)
-outbound <- as_tbl_time(outbound, Date)
+inbound <- as_tbl_time(inbound, Date) %>% 
+        group_by(Report.Location)
+outbound <- as_tbl_time(outbound, Date) %>% 
+        group_by(Report.Location)
 
 #Aggregate to location and day level to first plot
 inbound_summary <- inbound %>% 
         dplyr::arrange(Report.Location, Date) %>% 
-        dplyr::mutate(date = collapse_index(Date, "monthly")) %>% 
+        dplyr::mutate(Date = collapse_index(Date, "monthly")) %>% 
         dplyr::group_by(Report.Location, Date, add = TRUE) %>% 
         dplyr::summarise(ttl_hrs = sum(Hours), 
                          ttl_pay = sum(Dollars), 
                          median_wage = median(Wage))
+
 inbound_summary %>% 
         ggplot(aes(Date, 
                    ttl_pay)) +
@@ -62,8 +65,11 @@ inbound_summary %>%
         theme(axis.title.x = element_blank())
 
 summary(inbound_summary)
-#Might be best to "IC - Finance - Lou" locations since there are very few entries
+#Might be best to remove "IC - Finance - Lou" locations since there are very few entries
 
 #Need to decompose and plot
+inbound_summary$Date <- as.POSIXct(inbound_summary$Date, format = "%Y-%m-%d")
+decompose(inbound_summary)
+
 #Need to develop a forecast for it
 #Aggregate at other periods like day of week?
