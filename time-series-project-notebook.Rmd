@@ -1,0 +1,507 @@
+---
+title: "Time Series Project"
+date: 2018-02-18
+author: "Paul Forst, Tammy Hang, Rachel Kopecky, Jack Letcher, Ian O'Connor"
+output:
+  html_notebook:
+    fig_caption: yes
+    highlight: textmate
+    theme: cosmo
+    toc: yes
+    toc_depth: 4
+    toc_float: yes
+  html_document:
+    toc: yes
+    toc_depth: 4
+    toc_float: yes
+---
+
+```{r echo = FALSE, message = FALSE, warning = FALSE}
+#   Load Required Packages and Files  
+#   Check that necessary packages are installed
+packages <- c("tidyverse", "lubridate", "forecast", "tibbletime", "ggplot2", "ggthemes", "stringr")
+new.packages <- packages[!(packages %in% installed.packages()[,"Package"])]
+if(length(new.packages)) install.packages(new.packages)
+
+#   Load Neccessary Packages
+sapply(packages, library, character.only = TRUE)
+```
+
+
+### Problem Definition
+
+* Help forecast staffing needs based on the growth and seasonal trends of the client 
+* Understand the potential demands that client sales/clearances have on traffic 
+
+
+*Approach* 
+
+* Analyze the inbound and outbound loads at the main warehouse 
+* Mainly look at a monthly view but also potentially dive down to days of the week to better understand staffing at micro level 
+* While inbound and outbound are highly(?) correlated, there are some differences that could potentially be used to save on resource costs 
+
+ 
+*Goals* 
+
+* Allow better management and staffing practices to increase productivity and reduce costs 
+* Increase the bottom line 
+
+
+### Exploration
+
+```{r echo = FALSE, message = FALSE, warning = FALSE}
+inbound <- read.csv("Inbound Data.csv")
+outbound <- read.csv("Outbound Data.csv")
+
+#Convert Date to proper date class
+inbound$Date <- mdy(inbound$Date)
+outbound$Date <- mdy(outbound$Date)
+
+#correction for comma in a Dollars field
+inbound$Dollars <- str_replace(inbound$Dollars, ',', "")
+outbound$Dollars <- str_replace(outbound$Dollars, ',', "")
+
+#Convert Dollars and Wage to numeric
+inbound$Dollars <- as.numeric(sub('\\$','',as.character(inbound$Dollars))) 
+outbound$Dollars <- as.numeric(sub('\\$','',as.character(outbound$Dollars)))
+inbound$Wage <- as.numeric(sub('\\$','',as.character(inbound$Wage))) 
+outbound$Dollars <- as.numeric(sub('\\$','',as.character(outbound$Wage)))
+
+#Order by Date
+inbound <- inbound[order(inbound$Date), ]
+outbound <- outbound[order(outbound$Date), ]
+
+all <- rbind(inbound, outbound)
+
+#Use tibble time to convert the data frames to time series
+inbound <- as_tbl_time(inbound, Date) %>% 
+  group_by(Report.Location)
+outbound <- as_tbl_time(outbound, Date) %>% 
+  group_by(Report.Location)
+all <- as_tbl_time(all, Date) %>% 
+  group_by(Report.Location)
+
+#Aggregate to location and day level to first plot
+# inbound_summary_monthly <- inbound %>% 
+#   dplyr::arrange(Report.Location, Date) %>% 
+#   dplyr::mutate(Date = collapse_index(Date, "monthly")) %>% 
+#   dplyr::group_by(Report.Location, Date, add = TRUE) %>% 
+#   dplyr::summarise(ttl_hrs = sum(Hours), 
+#                    ttl_pay = sum(Dollars), 
+#                    median_wage = median(Wage))
+
+summary_monthly <- all %>% 
+  dplyr::arrange(Report.Location, Date) %>% 
+  dplyr::mutate(Date = collapse_index(Date, "monthly")) %>% 
+  dplyr::group_by(Dept, Report.Location, Date, add = TRUE) %>% 
+  dplyr::summarise(ttl_hrs = sum(Hours), 
+                   ttl_pay = sum(Dollars), 
+                   median_wage = median(as.numeric(Wage)))
+
+summary_quarterly <- all %>% 
+  dplyr::arrange(Report.Location, Date) %>% 
+  dplyr::mutate(Date = collapse_index(Date, "quarterly")) %>% 
+  dplyr::group_by(Dept, Report.Location, Date, add = TRUE) %>% 
+  dplyr::summarise(ttl_hrs = sum(Hours), 
+                   ttl_pay = sum(Dollars), 
+                   median_wage = median(as.numeric(Wage)))
+
+
+# inbound_summary_quarterly <- inbound %>% 
+#   dplyr::arrange(Report.Location, Date) %>% 
+#   dplyr::mutate(Date = collapse_index(Date, "quarterly")) %>% 
+#   dplyr::group_by(Report.Location, Date, add = TRUE) %>% 
+#   dplyr::summarise(ttl_hrs = sum(Hours), 
+#                    ttl_pay = sum(Dollars), 
+#                    median_wage = median(Wage))
+
+Sys.setenv(TZ = 'America/Louisville')
+
+all$Date <- as.POSIXct(all$Date, tz = 'America/Louisville')
+
+# inbound_summary_weekly <- inbound %>% 
+#   dplyr::arrange(Report.Location, Date) %>% 
+#   dplyr::mutate(Date = collapse_index(Date, "weekly")) %>% 
+#   dplyr::group_by(Report.Location, Date, add = TRUE) %>% 
+#   dplyr::summarise(ttl_hrs = sum(Hours), 
+#                    ttl_pay = sum(Dollars), 
+#                    median_wage = median(Wage))
+
+summary_weekly <- all %>% 
+  dplyr::arrange(Report.Location, Date) %>% 
+  dplyr::mutate(Date = collapse_index(Date, "weekly")) %>% 
+  dplyr::group_by(Dept, Report.Location, Date, add = TRUE) %>% 
+  dplyr::summarise(ttl_hrs = sum(Hours), 
+                   ttl_pay = sum(Dollars), 
+                   median_wage = median(as.numeric(Wage)))
+
+
+
+```
+
+
+```{r echo = FALSE, message = FALSE, warning = FALSE}
+
+p1 <- summary_quarterly %>% 
+  ggplot(aes(Date, 
+             ttl_pay)) +
+  geom_line(aes(color = Report.Location, linetype = Dept)) +
+  scale_y_continuous(labels = scales::dollar) +
+  theme_tufte() +
+  ggtitle("Total Pay by Quarter") +
+  theme(axis.title.x = element_blank()) 
+
+p2 <- summary_monthly %>% 
+  ggplot(aes(Date, 
+             ttl_pay)) +
+  geom_line(aes(color = Report.Location, linetype = Dept)) +
+  scale_y_continuous(labels = scales::dollar) +
+  theme_tufte() +
+  ggtitle("Total Pay by Month") +
+  theme(axis.title.x = element_blank(), legend.position = "none")
+
+p3 <- summary_weekly %>% 
+  ggplot(aes(Date, 
+             ttl_pay)) +
+  geom_line(aes(color = Report.Location, linetype = Dept)) +
+  scale_y_continuous(labels = scales::dollar) +
+  theme_tufte() +
+  ggtitle("Total Pay by Week") +
+  theme(axis.title.x = element_blank(), legend.position = "none")
+
+grid.arrange(p1, p2, p3, nrow = 3)
+
+```
+
+```{r echo = FALSE, message = FALSE, warning = FALSE}
+
+p4 <- summary_quarterly %>% 
+  ggplot(aes(Date, 
+             ttl_hrs)) +
+  geom_line(aes(color = Report.Location, linetype = Dept)) +
+  scale_y_continuous() +
+  theme_tufte() +
+  ggtitle("Total Hours by Quarter") +
+  theme(axis.title.x = element_blank())
+
+p5 <- summary_monthly %>% 
+  ggplot(aes(Date, 
+             ttl_hrs)) +
+  geom_line(aes(color = Report.Location, linetype = Dept)) +
+  scale_y_continuous() +
+  theme_tufte() +
+  ggtitle("Total Hours by Month") +
+  theme(axis.title.x = element_blank(), legend.position = "none")
+
+
+p6 <- summary_weekly %>% 
+  ggplot(aes(Date, 
+             ttl_hrs)) +
+  geom_line(aes(color = Report.Location, linetype = Dept)) +
+  scale_y_continuous() +
+  theme_tufte() +
+  ggtitle("Total Hours by Week") +
+  theme(axis.title.x = element_blank(), legend.position = "none")
+
+grid.arrange(p4, p5, p6, nrow = 3)
+
+```
+
+It appears that there may be seasonality and trend in both the Inbound and Outbound data. Also, the random fluctuations in the data do not appear to be constant over time, so we may need to use a multiplicative decomposition model to describe this series.
+
+### Decomposition
+
+#### Inbound
+
+##### Monthly
+
+```{r echo = FALSE, message = FALSE, warning = FALSE}
+
+#Need to decompose and plot
+#Start with monthly inbound data at the LOU location
+inbound_summary_monthly_hrs_ts <- summary_monthly %>%
+  filter(Report.Location == "LOU" & Dept == "Inbound")  %>% 
+  ungroup() %>% 
+  select(ttl_hrs)
+
+inbound_summary_monthly_pay_ts <- summary_monthly %>%
+  filter(Report.Location == "LOU" & Dept == "Inbound")  %>% 
+  ungroup() %>% 
+  select(ttl_pay)
+
+# convert data frame to time series object
+inbound_summary_monthly_hrs_ts <- ts(data = inbound_summary_monthly_hrs_ts, start = c(2015,1), frequency = 12)
+inbound_summary_monthly_pay_ts <- ts(data = inbound_summary_monthly_pay_ts, start = c(2015,1), frequency = 12)
+
+par(mfrow = c(2,2))
+
+# str(inbound_summary_ts)
+
+plot(decompose(inbound_summary_monthly_hrs_ts))
+#plot(decompose(inbound_summary_monthly_hrs_ts, type = "multiplicative"))
+inbound_monthly_decomp_hrs <- decompose(inbound_summary_monthly_hrs_ts)
+```
+```{r echo = FALSE, message = FALSE, warning = FALSE}
+
+plot(decompose(inbound_summary_monthly_pay_ts))
+#plot(decompose(inbound_summary_monthly_pay_ts, type = "multiplicative"))
+inbound_monthly_decomp_pay <- decompose(inbound_summary_monthly_pay_ts)
+
+
+
+```
+
+After looking at the decomposition of the monthly inbound series for both hours and pay, it appears that both of these can be described by an additive model, as the variation in the random component appears to be roughly constant over time.
+
+##### Weekly
+
+```{r echo = FALSE, message = FALSE, warning = FALSE}
+
+#Need to decompose and plot
+#Start with monthly inbound data at the LOU location
+inbound_summary_weekly_hrs_ts <- summary_weekly %>%
+  filter(Report.Location == "LOU" & Dept == "Inbound")  %>% 
+  ungroup() %>% 
+  select(ttl_hrs)
+
+inbound_summary_weekly_pay_ts <- summary_weekly %>%
+  filter(Report.Location == "LOU" & Dept == "Inbound")  %>% 
+  ungroup() %>% 
+  select(ttl_pay)
+
+# convert data frame to time series object
+inbound_summary_weekly_hrs_ts <- ts(data = inbound_summary_weekly_hrs_ts, start = c(2015,1), frequency = 52)
+inbound_summary_weekly_pay_ts <- ts(data = inbound_summary_weekly_pay_ts, start = c(2015,1), frequency = 52)
+
+# str(inbound_summary_ts)
+plot(decompose(inbound_summary_weekly_hrs_ts))
+#plot(decompose(inbound_summary_weekly_hrs_ts, type = "multiplicative"))
+inbound_weekly_decomp_hrs <- decompose(inbound_summary_weekly_hrs_ts)
+```
+```{r echo = FALSE, message = FALSE, warning = FALSE}
+
+plot(decompose(inbound_summary_weekly_pay_ts))
+#plot(decompose(inbound_summary_weekly_pay_ts, type = "multiplicative"))
+inbound_weekly_decomp_pay <- decompose(inbound_summary_weekly_pay_ts)
+
+```
+
+Again, the decomposition of the inbound weekly series for both hours and pay appear to have roughly constant variation in the random component, and thus an additive decomposition model is sufficient.
+
+#### Outbound
+
+##### Monthly
+
+```{r echo = FALSE, message = FALSE, warning = FALSE}
+
+#Need to decompose and plot
+#Start with monthly inbound data at the LOU location
+outbound_summary_monthly_hrs_ts <- summary_monthly %>%
+  filter(Report.Location == "LOU" & Dept == "Outbound")  %>% 
+  ungroup() %>% 
+  select(ttl_hrs)
+
+outbound_summary_monthly_pay_ts <- summary_monthly %>%
+  filter(Report.Location == "LOU" & Dept == "Outbound")  %>% 
+  ungroup() %>% 
+  select(ttl_pay)
+
+# convert data frame to time series object
+outbound_summary_monthly_hrs_ts <- ts(data = outbound_summary_monthly_hrs_ts, start = c(2015,1), frequency = 12)
+outbound_summary_monthly_pay_ts <- ts(data = outbound_summary_monthly_pay_ts, start = c(2015,1), frequency = 12)
+
+par(mfrow = c(2,2))
+
+# str(inbound_summary_ts)
+plot(decompose(outbound_summary_monthly_hrs_ts))
+```
+```{r echo = FALSE, message = FALSE, warning = FALSE}
+plot(decompose(outbound_summary_monthly_hrs_ts, type = "multiplicative"))
+outbound_monthly_decomp_hrs <- decompose(outbound_summary_monthly_hrs_ts, type = "multiplicative")
+```
+```{r echo = FALSE, message = FALSE, warning = FALSE}
+plot(decompose(outbound_summary_monthly_pay_ts))
+```
+```{r echo = FALSE, message = FALSE, warning = FALSE}
+plot(decompose(outbound_summary_monthly_pay_ts, type = "multiplicative"))
+outbound_monthly_decomp_pay <- decompose(outbound_summary_monthly_pay_ts, type = "multiplicative")
+```
+
+The variation in the random component of the monthly outbound series does not appear to be constant, so we will need to use a multiplicative decomposition for this series.
+
+##### Weekly
+
+```{r echo = FALSE, message = FALSE, warning = FALSE}
+
+#Need to decompose and plot
+#Start with monthly inbound data at the LOU location
+outbound_summary_weekly_hrs_ts <- summary_weekly %>%
+  filter(Report.Location == "LOU" & Dept == "Outbound")  %>% 
+  ungroup() %>% 
+  select(ttl_hrs)
+
+outbound_summary_weekly_pay_ts <- summary_weekly %>%
+  filter(Report.Location == "LOU" & Dept == "Outbound")  %>% 
+  ungroup() %>% 
+  select(ttl_pay)
+
+# convert data frame to time series object
+outbound_summary_weekly_hrs_ts <- ts(data = outbound_summary_weekly_hrs_ts, start = c(2015,1), frequency = 52)
+outbound_summary_weekly_pay_ts <- ts(data = outbound_summary_weekly_pay_ts, start = c(2015,1), frequency = 52)
+
+# str(inbound_summary_ts)
+plot(decompose(outbound_summary_weekly_hrs_ts))
+```
+```{r echo = FALSE, message = FALSE, warning = FALSE}
+plot(decompose(outbound_summary_weekly_hrs_ts, type = "multiplicative"))
+outbound_weekly_decomp_hrs <- decompose(outbound_summary_weekly_hrs_ts, type = "multiplicative")
+```
+```{r echo = FALSE, message = FALSE, warning = FALSE}
+plot(decompose(outbound_summary_weekly_pay_ts))
+```
+```{r echo = FALSE, message = FALSE, warning = FALSE}
+plot(decompose(outbound_summary_weekly_pay_ts, type = "multiplicative"))
+outbound_weekly_decomp_pay <- decompose(outbound_summary_weekly_pay_ts, type = "multiplicative")
+```
+
+Again, he variation in the random component of the weekly outbound series does not appear to be constant, so we will need to use a multiplicative decomposition for this series.
+
+### Removing Seasonality
+
+Next we need to seasonally adjust our series from above by estimating the seasonal component with our chosen decomposition method, and then subtracting it from the original series.
+
+#### Inbound
+
+```{r echo = FALSE, message = FALSE, warning = FALSE}
+
+inbound_monthly_hrs_seas_adj <- inbound_summary_monthly_hrs_ts - inbound_monthly_decomp_hrs$seasonal
+inbound_monthly_pay_seas_adj <- inbound_summary_monthly_pay_ts - inbound_monthly_decomp_pay$seasonal
+
+inbound_weekly_hrs_seas_adj <- inbound_summary_weekly_hrs_ts - inbound_weekly_decomp_hrs$seasonal
+inbound_weekly_pay_seas_adj <- inbound_summary_weekly_pay_ts - inbound_weekly_decomp_pay$seasonal
+
+s1 <- inbound_monthly_hrs_seas_adj %>% 
+  data.frame() %>% 
+  ggplot(aes(x = 1:36, y = inbound_summary_monthly_hrs_ts)) +
+  geom_line() +
+  scale_y_continuous() +
+  theme_tufte() +
+  ggtitle("Total Hours by Month, Seasonally Adjusted") +
+  theme(axis.title.x = element_blank())
+
+s2 <- inbound_monthly_pay_seas_adj %>% 
+  data.frame() %>% 
+  ggplot(aes(x = 1:36, y = inbound_summary_monthly_pay_ts)) +
+  geom_line() +
+  scale_y_continuous() +
+  theme_tufte() +
+  ggtitle("Total Pay by Month, Seasonally Adjusted") +
+  theme(axis.title.x = element_blank(), legend.position = "none")
+
+s3 <- inbound_weekly_hrs_seas_adj %>% 
+  data.frame() %>% 
+  ggplot(aes(x = 1:156, y = inbound_summary_weekly_hrs_ts)) +
+  geom_line() +
+  scale_y_continuous() +
+  theme_tufte() +
+  ggtitle("Total Hours by Week, Seasonally Adjusted") +
+  theme(axis.title.x = element_blank(), legend.position = "none")
+
+s4 <- inbound_weekly_pay_seas_adj %>% 
+  data.frame() %>% 
+  ggplot(aes(x = 1:156, y = inbound_summary_weekly_pay_ts)) +
+  geom_line() +
+  scale_y_continuous() +
+  theme_tufte() +
+  ggtitle("Total Pay by Week, Seasonally Adjusted") +
+  theme(axis.title.x = element_blank(), legend.position = "none")
+
+grid.arrange(s1, s2, s4, s4, nrow = 2, ncol = 2)
+
+```
+
+Now that we have removed the seasonality component from the series, we can begin testing out some forecasting methods.
+
+##### Exponential Smoothing
+
+For the inbound series, as they have roughly constant variation and could be explained using an additive model, we can use an exponential smoothing method for a short term forecast.
+
+###### Holt-Winters
+
+```{r echo = FALSE, message = FALSE, warning = FALSE}
+
+# Monthly
+# Hours
+
+inbound_monthly_hrs_HoltWinters <- HoltWinters(inbound_monthly_hrs_seas_adj)
+plot(inbound_monthly_hrs_HoltWinters)
+```
+```{r echo = FALSE, message = FALSE, warning = FALSE}
+inbound_monthly_hrs_HoltWinters_Forecast <- forecast(inbound_monthly_hrs_HoltWinters, h=12)
+plot(inbound_monthly_hrs_HoltWinters_Forecast)
+```
+```{r echo = FALSE, message = FALSE, warning = FALSE}
+# Pay
+
+inbound_monthly_pay_HoltWinters <- HoltWinters(inbound_monthly_pay_seas_adj)
+plot(inbound_monthly_hrs_HoltWinters)
+```
+```{r echo = FALSE, message = FALSE, warning = FALSE}
+inbound_monthly_pay_HoltWinters_Forecast <- forecast(inbound_monthly_pay_HoltWinters, h=12)
+plot(inbound_monthly_hrs_HoltWinters_Forecast)
+
+```
+
+Based on the Holt-Winters forecast for our monthly series, both our inbound hours and pay are expected to continue to increase heavily through 2018.
+
+```{r echo = FALSE, message = FALSE, warning = FALSE}
+
+# Weekly
+# Hours
+
+inbound_weekly_hrs_HoltWinters <- HoltWinters(inbound_weekly_hrs_seas_adj)
+plot(inbound_weekly_hrs_HoltWinters)
+```
+```{r echo = FALSE, message = FALSE, warning = FALSE}
+inbound_weekly_hrs_HoltWinters_Forecast <- forecast(inbound_weekly_hrs_HoltWinters, h=12)
+plot(inbound_weekly_hrs_HoltWinters_Forecast)
+```
+```{r echo = FALSE, message = FALSE, warning = FALSE}
+# Pay
+
+inbound_weekly_pay_HoltWinters <- HoltWinters(inbound_weekly_pay_seas_adj)
+plot(inbound_weekly_hrs_HoltWinters)
+```
+```{r echo = FALSE, message = FALSE, warning = FALSE}
+inbound_weekly_pay_HoltWinters_Forecast <- forecast(inbound_weekly_pay_HoltWinters, h=12)
+plot(inbound_weekly_hrs_HoltWinters_Forecast)
+
+```
+
+Our Holt-Winters forecasts for the weekly series appear to be lower than those for the monthly series. We will need to further analyze both the series and the forecasts to determine which is closer to what we should expect moving forward.
+
+Next we should test if our models are stationary, whether or not autocorrelation exists. If they are non-stationary, then we could possibly improve them using a different technique.
+
+```{r echo = FALSE, message = FALSE, warning = FALSE}
+
+acf(inbound_monthly_hrs_HoltWinters_Forecast$residuals[13:36])
+Box.test(inbound_monthly_hrs_HoltWinters_Forecast$residuals[13:36])
+```
+```{r echo = FALSE, message = FALSE, warning = FALSE}
+acf(inbound_monthly_pay_HoltWinters_Forecast$residuals[13:36])
+Box.test(inbound_monthly_pay_HoltWinters_Forecast$residuals[13:36])
+```
+```{r echo = FALSE, message = FALSE, warning = FALSE}
+acf(inbound_weekly_hrs_HoltWinters_Forecast$residuals[53:156])
+Box.test(inbound_weekly_hrs_HoltWinters_Forecast$residuals[53:156])
+```
+```{r echo = FALSE, message = FALSE, warning = FALSE}
+acf(inbound_weekly_pay_HoltWinters_Forecast$residuals[53:156])
+Box.test(inbound_weekly_pay_HoltWinters_Forecast$residuals[53:156])
+```
+
+All of our Holt-Winters models for the inbound series appear to be stationary.
+
+
+
+
