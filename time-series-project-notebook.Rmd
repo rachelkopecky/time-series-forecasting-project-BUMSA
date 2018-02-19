@@ -640,7 +640,7 @@ plot(forecast(outbound_weekly_pay_autoARIMA))
 
 ```
 
-### Per employee
+## Per employee
 
 ```{r}
 
@@ -755,4 +755,74 @@ plot(OB_monthly_hrs_snaive)
 
 OB_monthly_pay_snaive <- snaive(OB_monthly_pay_seas_adj[,1], h=24, level=95)
 plot(OB_monthly_pay_snaive)
+```
+
+
+
+-------Start of ARIMA Model----------
+We can sometimes make better models by utilizing these correlations in the data using ARIMA models. Since the mean is not quite stationary, we can take the first difference we computed. 
+
+```{r }
+#Montly Hours
+plot.ts(inbound_summary_monthly_hrs_ts)
+inbound_summary_monthly_hrs_ts_Diff <- diff(inbound_summary_monthly_hrs_ts)
+plot.ts(inbound_summary_monthly_hrs_ts_Diff)
+
+inbound_summary_monthly_hrs_ts2 <- diff(inbound_summary_monthly_hrs_ts, differences = 2)
+plot.ts(inbound_summary_monthly_hrs_ts2)
+
+acf2(inbound_summary_monthly_hrs_ts)
+
+
+inbound_summary_monthly_hrs_ts_ARIMA <- auto.arima(inbound_summary_monthly_hrs_ts)
+inbound_summary_monthly_hrs_ts_forecast <- forecast(inbound_summary_monthly_hrs_ts_ARIMA)
+plot(inbound_summary_monthly_hrs_ts_forecast)
+
+```
+#Monthly Pay
+```{r}
+plot.ts(inbound_summary_monthly_pay_ts)
+inbound_summary_monthly_pay_ts_Diff <- diff(inbound_summary_monthly_pay_ts)
+plot.ts(inbound_summary_monthly_pay_ts_Diff)
+
+inbound_summary_monthly_pay_ts2 <- diff(inbound_summary_monthly_pay_ts, differences = 2)
+plot.ts(inbound_summary_monthly_pay_ts2)
+
+acf2(inbound_summary_monthly_pay_ts)
+
+inbound_summary_monthly_pay_ts_ARIMA <- auto.arima(inbound_summary_monthly_pay_ts)
+inbound_summary_monthly_pay_ts_forecast <- forecast(inbound_summary_monthly_pay_ts_ARIMA)
+plot(inbound_summary_monthly_pay_ts_forecast)
+
+```
+#Weekly Hours
+```{r}
+plot.ts(inbound_summary_weekly_hrs_ts)
+inbound_summary_weekly_hrs_ts_Diff <- diff(inbound_summary_weekly_hrs_ts)
+plot.ts(inbound_summary_weekly_hrs_ts_Diff)
+
+inbound_summary_weekly_hrs_ts2 <- diff(inbound_summary_weekly_hrs_ts, differences = 2)
+plot.ts(inbound_summary_weekly_hrs_ts2)
+
+acf2(inbound_summary_weekly_hrs_ts)
+
+inbound_summary_weekly_hrs_ts_ARIMA <- auto.arima(inbound_summary_weekly_hrs_ts)
+inbound_summary_weekly_hrs_ts_forecast <- forecast(inbound_summary_weekly_hrs_ts_ARIMA)
+plot(inbound_summary_weekly_hrs_ts_forecast)
+```
+#Weekly Pay
+```{r}
+plot.ts(inbound_summary_weekly_pay_ts)
+inbound_summary_weekly_pay_ts_Diff <- diff(inbound_summary_weekly_pay_ts)
+plot.ts(inbound_summary_monthly_pay_ts)
+
+inbound_summary_weekly_pay_ts2 <- diff(inbound_summary_weekly_pay_ts, differences = 2)
+plot.ts(inbound_summary_weekly_pay_ts2)
+
+acf2(inbound_summary_weekly_pay_ts)
+
+inbound_summary_weekly_pay_ts_ARIMA <- auto.arima(inbound_summary_weekly_pay_ts)
+inbound_summary_weekly_ts_forecast <- forecast(inbound_summary_weekly_pay_ts_ARIMA)
+plot(inbound_summary_weekly_ts_forecast)
+
 ```
