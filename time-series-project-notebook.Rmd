@@ -19,7 +19,12 @@ output:
 ```{r echo = FALSE, message = FALSE, warning = FALSE}
 #   Load Required Packages and Files  
 #   Check that necessary packages are installed
+<<<<<<< HEAD
 packages <- c("tidyverse", "lubridate", "forecast", "tibbletime", "ggplot2", "ggthemes", "stringr", "gridExtra","fpp")
+=======
+
+packages <- c("tidyverse", "lubridate", "forecast", "tibbletime", "ggplot2", "ggthemes", "stringr", "gridExtra")
+>>>>>>> ce8969704cf9000adb8cf7148cbd3354581b3d29
 new.packages <- packages[!(packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages)
 
@@ -521,6 +526,7 @@ Box.test(inbound_weekly_pay_HoltWinters_Forecast$residuals[53:156])
 
 All of our Holt-Winters models for the inbound series appear to be stationary.
 
+<<<<<<< HEAD
 ### ARIMA
 
 Next we can use ARIMA to forecast our outbound series.
@@ -694,5 +700,53 @@ plot(OB_monthly_hrs_snaive)
 OB_monthly_pay_snaive <- snaive(OB_monthly_pay_seas_adj[,1], h=24, level=95)
 plot(OB_monthly_pay_snaive)
 ```
+=======
+## Alternative Forecasting Methods
+## Random Walk Forecasting with Drifts
 
+For the outbound series, as they have roughly constant variation and could be explained using an additive model, we can use a random walk forecasting method for a short term predictions.
 
+```{r echo = FALSE, message = FALSE, warning = FALSE}
+
+OB_monthly_hrs_seas_adj <- outbound_summary_monthly_hrs_ts - outbound_monthly_decomp_hrs$seasonal
+OB_monthly_pay_seas_adj <- outbound_summary_monthly_pay_ts - outbound_monthly_decomp_pay$seasonal
+
+OB_monthly_hrs_RWF <- rwf(OB_monthly_hrs_seas_adj[,1], h=24, drift=T, level=90,95)
+plot(OB_monthly_hrs_RWF)
+
+OB_monthly_pay_RWF <- rwf(OB_monthly_pay_seas_adj[,1], h=24, drift=T, level=90,95)
+plot(OB_monthly_pay_RWF)
+```
+## Alternative Forecasting Methods
+## Mean Forecasting
+
+For the outbound series, as they have roughly constant variation and could be explained using an additive model, we can use a mean forecasting method for a short term predictions.
+
+```{r echo = FALSE, message = FALSE, warning = FALSE}
+
+OB_monthly_hrs_seas_adj <- outbound_summary_monthly_hrs_ts - outbound_monthly_decomp_hrs$seasonal
+OB_monthly_pay_seas_adj <- outbound_summary_monthly_pay_ts - outbound_monthly_decomp_pay$seasonal
+
+OB_monthly_hrs_meanf <- meanf(OB_monthly_hrs_seas_adj[,1], h=24, level=95)
+plot(OB_monthly_hrs_meanf)
+
+OB_monthly_pay_meanf <- meanf(OB_monthly_pay_seas_adj[,1], h=24, level=95)
+plot(OB_monthly_pay_meanf)
+```
+## Alternative Forecasting Methods
+## SNaive Forecasting
+
+For the outbound series, as they have roughly constant variation and could be explained using an additive model, we can use a seasonal naive forecasting method for a short term predictions.
+
+```{r echo = FALSE, message = FALSE, warning = FALSE}
+
+OB_monthly_hrs_seas_adj <- outbound_summary_monthly_hrs_ts - outbound_monthly_decomp_hrs$seasonal
+OB_monthly_pay_seas_adj <- outbound_summary_monthly_pay_ts - outbound_monthly_decomp_pay$seasonal
+>>>>>>> ce8969704cf9000adb8cf7148cbd3354581b3d29
+
+OB_monthly_hrs_snaive <- snaive(OB_monthly_hrs_seas_adj[,1], h=24, level=95)
+plot(OB_monthly_hrs_snaive)
+
+OB_monthly_pay_snaive <- snaive(OB_monthly_pay_seas_adj[,1], h=24, level=95)
+plot(OB_monthly_pay_snaive)
+```
