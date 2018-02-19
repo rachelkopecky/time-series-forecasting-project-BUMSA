@@ -20,7 +20,7 @@ output:
 #   Load Required Packages and Files  
 #   Check that necessary packages are installed
 
-packages <- c("tidyverse", "lubridate", "forecast", "tibbletime", "ggplot2", "ggthemes", "stringr", "gridExtra", "fpp")
+packages <- c("tidyverse", "lubridate", "forecast", "tibbletime", "ggplot2", "ggthemes", "stringr", "gridExtra", "fpp", "astsa")
 
 new.packages <- packages[!(packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages)
@@ -828,3 +828,21 @@ inbound_summary_weekly_ts_forecast <- forecast(inbound_summary_weekly_pay_ts_ARI
 plot(inbound_summary_weekly_ts_forecast)
 
 ```
+
+
+## Ian Arima
+```{r}
+# Outbound ARIMA Models
+monthly_hours <- auto.arima(outbound_summary_monthly_hrs_ts)
+plot(forecast(monthly_hours))
+
+monthly_pay <- auto.arima(outbound_summary_monthly_pay_ts)
+plot(forecast(monthly_pay))
+
+weekly_hours <- auto.arima(outbound_summary_weekly_hrs_ts)
+plot(forecast(weekly_hours))
+
+weekly_pay <- auto.arima(outbound_summary_weekly_pay_ts)
+plot(forecast(weekly_pay))
+```
+
