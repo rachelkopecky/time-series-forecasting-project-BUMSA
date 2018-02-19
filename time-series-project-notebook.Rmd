@@ -3,14 +3,14 @@ title: "Time Series Project"
 date: 2018-02-18
 author: "Paul Forst, Tammy Hang, Rachel Kopecky, Jack Letcher, Ian O'Connor"
 output:
+  html_document:
+    toc: yes
+    toc_depth: 4
+    toc_float: yes
   html_notebook:
     fig_caption: yes
     highlight: textmate
     theme: cosmo
-    toc: yes
-    toc_depth: 4
-    toc_float: yes
-  html_document:
     toc: yes
     toc_depth: 4
     toc_float: yes
@@ -30,7 +30,7 @@ sapply(packages, library, character.only = TRUE)
 ```
 
 
-### Problem Definition
+# Problem Definition
 
 * Help forecast staffing needs based on the growth and seasonal trends of the client 
 * Understand the potential demands that client sales/clearances have on traffic 
@@ -49,7 +49,7 @@ sapply(packages, library, character.only = TRUE)
 * Increase the bottom line 
 
 
-### Exploration
+# Exploration
 
 ```{r echo = FALSE, message = FALSE, warning = FALSE}
 inbound <- read.csv("Inbound Data.csv")
@@ -223,11 +223,11 @@ grid.arrange(p4, p5, p6, nrow = 3)
 
 It appears that there may be seasonality and trend in both the Inbound and Outbound data. Also, the random fluctuations in the data do not appear to be constant over time, so we may need to use a multiplicative decomposition model to describe this series.
 
-### Decomposition
+## Decomposition
 
-#### Inbound
+### Inbound
 
-##### Monthly
+#### Monthly
 
 ```{r echo = FALSE, message = FALSE, warning = FALSE}
 
@@ -267,7 +267,7 @@ inbound_monthly_decomp_pay <- decompose(inbound_summary_monthly_pay_ts)
 
 After looking at the decomposition of the monthly inbound series for both hours and pay, it appears that both of these can be described by an additive model, as the variation in the random component appears to be roughly constant over time.
 
-##### Weekly
+#### Weekly
 
 ```{r echo = FALSE, message = FALSE, warning = FALSE}
 
@@ -302,9 +302,9 @@ inbound_weekly_decomp_pay <- decompose(inbound_summary_weekly_pay_ts)
 
 Again, the decomposition of the inbound weekly series for both hours and pay appear to have roughly constant variation in the random component, and thus an additive decomposition model is sufficient.
 
-#### Outbound
+### Outbound
 
-##### Monthly
+#### Monthly
 
 ```{r echo = FALSE, message = FALSE, warning = FALSE}
 
@@ -343,7 +343,7 @@ outbound_monthly_decomp_pay <- decompose(outbound_summary_monthly_pay_ts, type =
 
 The variation in the random component of the monthly outbound series does not appear to be constant, so we will need to use a multiplicative decomposition for this series.
 
-##### Weekly
+#### Weekly
 
 ```{r echo = FALSE, message = FALSE, warning = FALSE}
 
@@ -380,11 +380,11 @@ outbound_weekly_decomp_pay <- decompose(outbound_summary_weekly_pay_ts, type = "
 
 Again, the variation in the random component of the weekly outbound series does not appear to be constant, so we will need to use a multiplicative decomposition for this series.
 
-### Removing Seasonality
+## Removing Seasonality
 
 Next we need to seasonally adjust our series from above by estimating the seasonal component with our chosen decomposition method, and then subtracting it from the original series.
 
-#### Inbound
+### Inbound
 
 ```{r echo = FALSE, message = FALSE, warning = FALSE}
 
@@ -440,11 +440,13 @@ grid.arrange(s1, s2, s4, s4, nrow = 2, ncol = 2)
 
 Now that we have removed the seasonality component from the series, we can begin testing out some forecasting methods.
 
-##### Exponential Smoothing
+#Forecasting
+
+## Exponential Smoothing
 
 For the inbound series, as they have roughly constant variation and could be explained using an additive model, we can use an exponential smoothing method for a short term forecast.
 
-###### Holt-Winters
+## Holt-Winters
 
 ```{r echo = FALSE, message = FALSE, warning = FALSE}
 
@@ -534,7 +536,7 @@ Box.test(inbound_weekly_pay_HoltWinters_Forecast$residuals[53:156])
 All of our Holt-Winters models for the inbound series appear to be stationary.
 
 <<<<<<< HEAD
-### ARIMA
+## ARIMA
 
 Next we can use ARIMA to forecast our outbound series.
 
@@ -659,7 +661,7 @@ inbound_summary_weekly_hrs_per_ts <- summary_weekly %>%
 ```
 
 
-## Alternative Forecasting Methods
+# Alternative Forecasting Methods
 ## Random Walk Forecasting with Drifts
 
 For the outbound series, as they have roughly constant variation and could be explained using an additive model, we can use a random walk forecasting method for a short term predictions.
@@ -675,7 +677,7 @@ plot(OB_monthly_hrs_RWF)
 OB_monthly_pay_RWF <- rwf(OB_monthly_pay_seas_adj[,1], h=24, drift=T, level=90,95)
 plot(OB_monthly_pay_RWF)
 ```
-## Alternative Forecasting Methods
+
 ## Mean Forecasting
 
 For the outbound series, as they have roughly constant variation and could be explained using an additive model, we can use a mean forecasting method for a short term predictions.
@@ -691,7 +693,7 @@ plot(OB_monthly_hrs_meanf)
 OB_monthly_pay_meanf <- meanf(OB_monthly_pay_seas_adj[,1], h=24, level=95)
 plot(OB_monthly_pay_meanf)
 ```
-## Alternative Forecasting Methods
+
 ## SNaive Forecasting
 
 For the outbound series, as they have roughly constant variation and could be explained using an additive model, we can use a seasonal naive forecasting method for a short term predictions.
@@ -708,7 +710,7 @@ OB_monthly_pay_snaive <- snaive(OB_monthly_pay_seas_adj[,1], h=24, level=95)
 plot(OB_monthly_pay_snaive)
 ```
 =======
-## Alternative Forecasting Methods
+
 ## Random Walk Forecasting with Drifts
 
 For the outbound series, as they have roughly constant variation and could be explained using an additive model, we can use a random walk forecasting method for a short term predictions.
@@ -724,7 +726,7 @@ plot(OB_monthly_hrs_RWF)
 OB_monthly_pay_RWF <- rwf(OB_monthly_pay_seas_adj[,1], h=24, drift=T, level=90,95)
 plot(OB_monthly_pay_RWF)
 ```
-## Alternative Forecasting Methods
+
 ## Mean Forecasting
 
 For the outbound series, as they have roughly constant variation and could be explained using an additive model, we can use a mean forecasting method for a short term predictions.
@@ -740,7 +742,7 @@ plot(OB_monthly_hrs_meanf)
 OB_monthly_pay_meanf <- meanf(OB_monthly_pay_seas_adj[,1], h=24, level=95)
 plot(OB_monthly_pay_meanf)
 ```
-## Alternative Forecasting Methods
+
 ## SNaive Forecasting
 
 For the outbound series, as they have roughly constant variation and could be explained using an additive model, we can use a seasonal naive forecasting method for a short term predictions.
