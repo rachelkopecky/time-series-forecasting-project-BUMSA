@@ -19,12 +19,9 @@ output:
 ```{r echo = FALSE, message = FALSE, warning = FALSE}
 #   Load Required Packages and Files  
 #   Check that necessary packages are installed
-<<<<<<< HEAD
-packages <- c("tidyverse", "lubridate", "forecast", "tibbletime", "ggplot2", "ggthemes", "stringr", "gridExtra","fpp")
-=======
 
-packages <- c("tidyverse", "lubridate", "forecast", "tibbletime", "ggplot2", "ggthemes", "stringr", "gridExtra")
->>>>>>> ce8969704cf9000adb8cf7148cbd3354581b3d29
+packages <- c("tidyverse", "lubridate", "forecast", "tibbletime", "ggplot2", "ggthemes", "stringr", "gridExtra", "fpp")
+
 new.packages <- packages[!(packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages)
 
@@ -742,7 +739,6 @@ For the outbound series, as they have roughly constant variation and could be ex
 
 OB_monthly_hrs_seas_adj <- outbound_summary_monthly_hrs_ts - outbound_monthly_decomp_hrs$seasonal
 OB_monthly_pay_seas_adj <- outbound_summary_monthly_pay_ts - outbound_monthly_decomp_pay$seasonal
->>>>>>> ce8969704cf9000adb8cf7148cbd3354581b3d29
 
 OB_monthly_hrs_snaive <- snaive(OB_monthly_hrs_seas_adj[,1], h=24, level=95)
 plot(OB_monthly_hrs_snaive)
