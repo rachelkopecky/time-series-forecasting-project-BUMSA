@@ -806,7 +806,7 @@ plot.ts(inbound_summary_weekly_hrs_ts_Diff)
 inbound_summary_weekly_hrs_ts2 <- diff(inbound_summary_weekly_hrs_ts, differences = 2)
 plot.ts(inbound_summary_weekly_hrs_ts2)
 
-acf2(inbound_summary_weekly_hrs_ts)
+acf2(inbound_summary_weekly_hrs_ts, max.lag = 20)
 
 inbound_summary_weekly_hrs_ts_ARIMA <- auto.arima(inbound_summary_weekly_hrs_ts)
 inbound_summary_weekly_hrs_ts_forecast <- forecast(inbound_summary_weekly_hrs_ts_ARIMA)
@@ -821,7 +821,7 @@ plot.ts(inbound_summary_monthly_pay_ts)
 inbound_summary_weekly_pay_ts2 <- diff(inbound_summary_weekly_pay_ts, differences = 2)
 plot.ts(inbound_summary_weekly_pay_ts2)
 
-acf2(inbound_summary_weekly_pay_ts)
+acf2(inbound_summary_weekly_pay_ts, max.lag = 20)
 
 inbound_summary_weekly_pay_ts_ARIMA <- auto.arima(inbound_summary_weekly_pay_ts)
 inbound_summary_weekly_ts_forecast <- forecast(inbound_summary_weekly_pay_ts_ARIMA)
