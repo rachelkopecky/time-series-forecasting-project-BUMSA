@@ -16,7 +16,7 @@ output:
     toc_float: yes
 ---
 
-```{r echo = FALSE, message = FALSE, warning = FALSE}
+```{r echo = FALSE, message = FALSE, warning = FALSE, include=FALSE}
 #   Load Required Packages and Files  
 #   Check that necessary packages are installed
 
@@ -157,6 +157,7 @@ p1 <- summary_quarterly %>%
   scale_y_continuous(labels = scales::dollar) +
   theme_tufte() +
   ggtitle("Total Pay by Quarter") +
+  ylab("Total Pay") +
   theme(axis.title.x = element_blank()) 
 
 p2 <- summary_monthly %>% 
@@ -166,6 +167,7 @@ p2 <- summary_monthly %>%
   scale_y_continuous(labels = scales::dollar) +
   theme_tufte() +
   ggtitle("Total Pay by Month") +
+  ylab("Total Pay") +
   theme(axis.title.x = element_blank(), legend.position = "none")
 
 p3 <- summary_weekly %>% 
@@ -175,6 +177,7 @@ p3 <- summary_weekly %>%
   scale_y_continuous(labels = scales::dollar) +
   theme_tufte() +
   ggtitle("Total Pay by Week") +
+  ylab("Total Pay") +
   theme(axis.title.x = element_blank(), legend.position = "none")
 
 grid.arrange(p1, p2, p3, nrow = 3)
@@ -190,6 +193,7 @@ p4 <- summary_quarterly %>%
   scale_y_continuous() +
   theme_tufte() +
   ggtitle("Total Hours by Quarter") +
+  ylab("Total Hours") +
   theme(axis.title.x = element_blank())
 
 p5 <- summary_monthly %>% 
@@ -199,6 +203,7 @@ p5 <- summary_monthly %>%
   scale_y_continuous() +
   theme_tufte() +
   ggtitle("Total Hours by Month") +
+  ylab("Total Hours") +
   theme(axis.title.x = element_blank(), legend.position = "none")
 
 
@@ -209,6 +214,7 @@ p6 <- summary_weekly %>%
   scale_y_continuous() +
   theme_tufte() +
   ggtitle("Total Hours by Week") +
+  ylab("Total Hours") +
   theme(axis.title.x = element_blank(), legend.position = "none")
 
 grid.arrange(p4, p5, p6, nrow = 3)
@@ -395,6 +401,7 @@ s1 <- inbound_monthly_hrs_seas_adj %>%
   scale_y_continuous() +
   theme_tufte() +
   ggtitle("Total Hours by Month, Seasonally Adjusted") +
+  ylab("Total Hours") +
   theme(axis.title.x = element_blank())
 
 s2 <- inbound_monthly_pay_seas_adj %>% 
@@ -404,6 +411,7 @@ s2 <- inbound_monthly_pay_seas_adj %>%
   scale_y_continuous() +
   theme_tufte() +
   ggtitle("Total Pay by Month, Seasonally Adjusted") +
+  ylab("Total Pay") +
   theme(axis.title.x = element_blank(), legend.position = "none")
 
 s3 <- inbound_weekly_hrs_seas_adj %>% 
@@ -413,6 +421,7 @@ s3 <- inbound_weekly_hrs_seas_adj %>%
   scale_y_continuous() +
   theme_tufte() +
   ggtitle("Total Hours by Week, Seasonally Adjusted") +
+  ylab("Total Hours") +
   theme(axis.title.x = element_blank(), legend.position = "none")
 
 s4 <- inbound_weekly_pay_seas_adj %>% 
@@ -422,6 +431,7 @@ s4 <- inbound_weekly_pay_seas_adj %>%
   scale_y_continuous() +
   theme_tufte() +
   ggtitle("Total Pay by Week, Seasonally Adjusted") +
+  ylab("Total Pay") +
   theme(axis.title.x = element_blank(), legend.position = "none")
 
 grid.arrange(s1, s2, s4, s4, nrow = 2, ncol = 2)
