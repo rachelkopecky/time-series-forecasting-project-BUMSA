@@ -229,6 +229,8 @@ It appears that there may be seasonality and trend in both the Inbound and Outbo
 
 #### Monthly
 
+Hours
+
 ```{r echo = FALSE, message = FALSE, warning = FALSE}
 
 #Need to decompose and plot
@@ -255,6 +257,7 @@ plot(decompose(inbound_summary_monthly_hrs_ts))
 #plot(decompose(inbound_summary_monthly_hrs_ts, type = "multiplicative"))
 inbound_monthly_decomp_hrs <- decompose(inbound_summary_monthly_hrs_ts)
 ```
+Cost
 ```{r echo = FALSE, message = FALSE, warning = FALSE}
 
 plot(decompose(inbound_summary_monthly_pay_ts))
@@ -269,6 +272,7 @@ After looking at the decomposition of the monthly inbound series for both hours 
 
 #### Weekly
 
+Hours
 ```{r echo = FALSE, message = FALSE, warning = FALSE}
 
 #Need to decompose and plot
@@ -292,6 +296,8 @@ plot(decompose(inbound_summary_weekly_hrs_ts))
 #plot(decompose(inbound_summary_weekly_hrs_ts, type = "multiplicative"))
 inbound_weekly_decomp_hrs <- decompose(inbound_summary_weekly_hrs_ts)
 ```
+
+Cost
 ```{r echo = FALSE, message = FALSE, warning = FALSE}
 
 plot(decompose(inbound_summary_weekly_pay_ts))
@@ -306,6 +312,7 @@ Again, the decomposition of the inbound weekly series for both hours and pay app
 
 #### Monthly
 
+Hours
 ```{r echo = FALSE, message = FALSE, warning = FALSE}
 
 #Need to decompose and plot
@@ -333,6 +340,8 @@ plot(decompose(outbound_summary_monthly_hrs_ts))
 plot(decompose(outbound_summary_monthly_hrs_ts, type = "multiplicative"))
 outbound_monthly_decomp_hrs <- decompose(outbound_summary_monthly_hrs_ts, type = "multiplicative")
 ```
+
+Cost
 ```{r echo = FALSE, message = FALSE, warning = FALSE}
 plot(decompose(outbound_summary_monthly_pay_ts))
 ```
@@ -345,6 +354,7 @@ The variation in the random component of the monthly outbound series does not ap
 
 #### Weekly
 
+Hours
 ```{r echo = FALSE, message = FALSE, warning = FALSE}
 
 #Need to decompose and plot
@@ -370,6 +380,8 @@ plot(decompose(outbound_summary_weekly_hrs_ts))
 plot(decompose(outbound_summary_weekly_hrs_ts, type = "multiplicative"))
 outbound_weekly_decomp_hrs <- decompose(outbound_summary_weekly_hrs_ts, type = "multiplicative")
 ```
+
+Cost
 ```{r echo = FALSE, message = FALSE, warning = FALSE}
 plot(decompose(outbound_summary_weekly_pay_ts))
 ```
@@ -773,7 +785,7 @@ plot.ts(inbound_summary_monthly_hrs_ts_Diff)
 inbound_summary_monthly_hrs_ts2 <- diff(inbound_summary_monthly_hrs_ts, differences = 2)
 plot.ts(inbound_summary_monthly_hrs_ts2)
 
-acf2(inbound_summary_monthly_hrs_ts)
+acf2(inbound_summary_monthly_hrs_ts, max.lag = 20)
 
 
 inbound_summary_monthly_hrs_ts_ARIMA <- auto.arima(inbound_summary_monthly_hrs_ts)
@@ -790,7 +802,7 @@ plot.ts(inbound_summary_monthly_pay_ts_Diff)
 inbound_summary_monthly_pay_ts2 <- diff(inbound_summary_monthly_pay_ts, differences = 2)
 plot.ts(inbound_summary_monthly_pay_ts2)
 
-acf2(inbound_summary_monthly_pay_ts)
+acf2(inbound_summary_monthly_pay_ts, max.lag = 20)
 
 inbound_summary_monthly_pay_ts_ARIMA <- auto.arima(inbound_summary_monthly_pay_ts)
 inbound_summary_monthly_pay_ts_forecast <- forecast(inbound_summary_monthly_pay_ts_ARIMA)
@@ -828,21 +840,3 @@ inbound_summary_weekly_ts_forecast <- forecast(inbound_summary_weekly_pay_ts_ARI
 plot(inbound_summary_weekly_ts_forecast)
 
 ```
-
-
-## Ian Arima
-```{r}
-# Outbound ARIMA Models
-monthly_hours <- auto.arima(outbound_summary_monthly_hrs_ts)
-plot(forecast(monthly_hours))
-
-monthly_pay <- auto.arima(outbound_summary_monthly_pay_ts)
-plot(forecast(monthly_pay))
-
-weekly_hours <- auto.arima(outbound_summary_weekly_hrs_ts)
-plot(forecast(weekly_hours))
-
-weekly_pay <- auto.arima(outbound_summary_weekly_pay_ts)
-plot(forecast(weekly_pay))
-```
-
