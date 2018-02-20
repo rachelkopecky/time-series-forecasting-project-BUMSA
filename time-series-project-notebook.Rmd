@@ -233,11 +233,7 @@ It appears that there may be seasonality and trend in both the Inbound and Outbo
 
 ### Inbound
 
-#### Monthly
-
-Hours
-
-```{r}
+```{r fig.width = 10}
 
 #Need to decompose and plot
 #Start with monthly inbound data at the LOU location
@@ -255,31 +251,22 @@ inbound_summary_monthly_pay_ts <- summary_monthly %>%
 inbound_summary_monthly_hrs_ts <- ts(data = inbound_summary_monthly_hrs_ts, start = c(2015,1), frequency = 12)
 inbound_summary_monthly_pay_ts <- ts(data = inbound_summary_monthly_pay_ts, start = c(2015,1), frequency = 12)
 
-par(mfrow = c(2,2))
-
 # str(inbound_summary_ts)
 
-plot(decompose(inbound_summary_monthly_hrs_ts))
+d1<- autoplot(decompose(inbound_summary_monthly_hrs_ts), main = "Total Hours per Month (Additive Decomp)")
 #plot(decompose(inbound_summary_monthly_hrs_ts, type = "multiplicative"))
-inbound_monthly_decomp_hrs <- decompose(inbound_summary_monthly_hrs_ts)
-```
-Cost
-```{r}
 
-plot(decompose(inbound_summary_monthly_pay_ts))
+d2 <- autoplot(decompose(inbound_summary_monthly_pay_ts), main = "Total Pay per Month (Additive Decomp)")
 #plot(decompose(inbound_summary_monthly_pay_ts, type = "multiplicative"))
-inbound_monthly_decomp_pay <- decompose(inbound_summary_monthly_pay_ts)
 
 
+grid.arrange(d1,d2, ncol = 2)
 
 ```
 
 After looking at the decomposition of the monthly inbound series for both hours and pay, it appears that both of these can be described by an additive model, as the variation in the random component appears to be roughly constant over time.
 
-#### Weekly
-
-Hours
-```{r}
+```{r fig.width = 10}
 
 #Need to decompose and plot
 #Start with monthly inbound data at the LOU location
@@ -298,28 +285,19 @@ inbound_summary_weekly_hrs_ts <- ts(data = inbound_summary_weekly_hrs_ts, start 
 inbound_summary_weekly_pay_ts <- ts(data = inbound_summary_weekly_pay_ts, start = c(2015,1), frequency = 52)
 
 # str(inbound_summary_ts)
-plot(decompose(inbound_summary_weekly_hrs_ts))
+d3 <- autoplot(decompose(inbound_summary_weekly_hrs_ts), main = "Total Hours per Week (Additive Decomp)")
 #plot(decompose(inbound_summary_weekly_hrs_ts, type = "multiplicative"))
-inbound_weekly_decomp_hrs <- decompose(inbound_summary_weekly_hrs_ts)
-```
 
-Cost
-```{r}
-
-plot(decompose(inbound_summary_weekly_pay_ts))
+d4 <- autoplot(decompose(inbound_summary_weekly_pay_ts), main = "Total Pay per Week (Additive Decomp)")
 #plot(decompose(inbound_summary_weekly_pay_ts, type = "multiplicative"))
-inbound_weekly_decomp_pay <- decompose(inbound_summary_weekly_pay_ts)
 
+grid.arrange(d3, d4, ncol = 2)
 ```
 
 Again, the decomposition of the inbound weekly series for both hours and pay appear to have roughly constant variation in the random component, and thus an additive decomposition model is sufficient.
 
 ### Outbound
-
-#### Monthly
-
-Hours
-```{r}
+```{r fig.width = 12, fig.height = 9}
 
 #Need to decompose and plot
 #Start with monthly inbound data at the LOU location
@@ -340,27 +318,22 @@ outbound_summary_monthly_pay_ts <- ts(data = outbound_summary_monthly_pay_ts, st
 layout(matrix(c(1,1,2,2), 2, 2, byrow = TRUE))
 
 # str(inbound_summary_ts)
-plot(decompose(outbound_summary_monthly_hrs_ts))
+d5 <- autoplot(decompose(outbound_summary_monthly_hrs_ts), main = "Total Hours per Month (Additive Decomp)")
 
-plot(decompose(outbound_summary_monthly_hrs_ts, type = "multiplicative"))
+d6 <- autoplot(decompose(outbound_summary_monthly_hrs_ts, type = "multiplicative"), main = "Total Hours per Month (Multiplicative Decomp)")
 outbound_monthly_decomp_hrs <- decompose(outbound_summary_monthly_hrs_ts, type = "multiplicative")
-```
 
-Cost
-```{r}
-plot(decompose(outbound_summary_monthly_pay_ts))
-```
-```{r}
-plot(decompose(outbound_summary_monthly_pay_ts, type = "multiplicative"))
+d7 <- autoplot(decompose(outbound_summary_monthly_pay_ts), main = "Total Pay per Month (Additive Decomp)")
+
+d8 <- autoplot(decompose(outbound_summary_monthly_pay_ts, type = "multiplicative"), main = "Total Pay per Month (Multiplicative Decomp)")
 outbound_monthly_decomp_pay <- decompose(outbound_summary_monthly_pay_ts, type = "multiplicative")
+
+grid.arrange(d5, d6, d7, d8, nrow = 2, ncol = 2)
 ```
 
 The variation in the random component of the monthly outbound series does not appear to be constant, so we will need to use a multiplicative decomposition for this series.
 
-#### Weekly
-
-Hours
-```{r}
+```{r fig.width = 12, fig.height = 9}
 
 #Need to decompose and plot
 #Start with monthly inbound data at the LOU location
@@ -379,20 +352,17 @@ outbound_summary_weekly_hrs_ts <- ts(data = outbound_summary_weekly_hrs_ts, star
 outbound_summary_weekly_pay_ts <- ts(data = outbound_summary_weekly_pay_ts, start = c(2015,1), frequency = 52)
 
 # str(inbound_summary_ts)
-plot(decompose(outbound_summary_weekly_hrs_ts))
-```
-```{r}
-plot(decompose(outbound_summary_weekly_hrs_ts, type = "multiplicative"))
-outbound_weekly_decomp_hrs <- decompose(outbound_summary_weekly_hrs_ts, type = "multiplicative")
-```
+d9 <- autoplot(decompose(outbound_summary_weekly_hrs_ts), main = "Total Hours per Week (Additive Decomp)")
 
-Cost
-```{r}
-plot(decompose(outbound_summary_weekly_pay_ts))
-```
-```{r}
-plot(decompose(outbound_summary_weekly_pay_ts, type = "multiplicative"))
+d10 <- autoplot(decompose(outbound_summary_weekly_hrs_ts, type = "multiplicative"), main = "Total Hours per Week (Multiplicative Decomp)")
+outbound_weekly_decomp_hrs <- decompose(outbound_summary_weekly_hrs_ts, type = "multiplicative")
+
+d11 <- autoplot(decompose(outbound_summary_weekly_pay_ts), main = "Total Pay per Week (Additive Decomp)")
+
+d12 <- autoplot(decompose(outbound_summary_weekly_pay_ts, type = "multiplicative"), main = "Total Pay per Week (Multiplicative Decomp)")
 outbound_weekly_decomp_pay <- decompose(outbound_summary_weekly_pay_ts, type = "multiplicative")
+
+grid.arrange(d9,d10,d11,d12, nrow = 2, ncol = 2)
 ```
 
 Again, the variation in the random component of the weekly outbound series does not appear to be constant, so we will need to use a multiplicative decomposition for this series.
@@ -401,106 +371,103 @@ Again, the variation in the random component of the weekly outbound series does 
 
 ## Mean
 
-For the outbound series, as they have roughly constant variation and could be explained using an additive model, we can use a mean forecasting method for a short term predictions.
+```{r fig.width = 12, fig.height = 9}
+
+m1 <- autoplot(meanf(inbound_summary_monthly_hrs_ts, h = 24), main = "Inbound, Total Hours per Month", ylab = "Total Hours")
+
+m2 <- autoplot(meanf(inbound_summary_monthly_pay_ts, h = 24), main = "Inbound, Total Pay per Month", ylab = "Total Pay")
+
+m3 <- autoplot(meanf(outbound_summary_monthly_hrs_ts, h = 24), main = "Outbound, Total Hours per Month", ylab = "Total Hours")
+
+m4 <- autoplot(meanf(outbound_summary_monthly_pay_ts, h = 24), main = "Outbound, Total Pay per Month", ylab = "Total Pay")
+
+grid.arrange(m1, m2, m3, m4, nrow = 2, ncol = 2)
+```
+
+## Random Walk 
 
 ```{r}
 
-OB_monthly_hrs_seas_adj <- outbound_summary_monthly_hrs_ts - outbound_monthly_decomp_hrs$seasonal
-OB_monthly_pay_seas_adj <- outbound_summary_monthly_pay_ts - outbound_monthly_decomp_pay$seasonal
+r1 <- autoplot(rwf(inbound_summary_monthly_hrs_ts, h = 24, drift = F), main = "Random Walk, Monthly Hours", ylab = "Total Hours") 
+r2 <- autoplot(rwf(inbound_summary_monthly_hrs_ts, h = 24, drift = T), main = "Random Walk with Drift, Monthly Hours", ylab = "Total Hours")
 
-OB_monthly_hrs_meanf <- meanf(OB_monthly_hrs_seas_adj[,1], h=24, level=95)
-plot(OB_monthly_hrs_meanf)
+r3 <- autoplot(rwf(inbound_summary_monthly_pay_ts, h = 24, drift = F), main = "Random Walk, Monthly Pay", ylab = "Total Pay")
+r4 <- autoplot(rwf(inbound_summary_monthly_pay_ts, h = 24, drift = T), main = "Random Walk with Drift, Monthly Pay", ylab = "Total Pay")
 
-OB_monthly_pay_meanf <- meanf(OB_monthly_pay_seas_adj[,1], h=24, level=95)
-plot(OB_monthly_pay_meanf)
+r5 <- autoplot(rwf(outbound_summary_monthly_hrs_ts, h = 24, drift = F), main = "Random Walk, Monthly Hours", ylab = "Total Hours")
+r6 <- autoplot(rwf(outbound_summary_monthly_hrs_ts, h = 24, drift = T), main = "Random Walk with Drift, Monthly Hours", ylab = "Total Hours")
+
+r7 <- autoplot(rwf(outbound_summary_monthly_pay_ts, h = 24, drift = F), main = "Random Walk, Monthly Pay", ylab = "Total Pay")
+r8 <- autoplot(rwf(outbound_summary_monthly_pay_ts, h = 24, drift = T), main = "Random Walk with Drift, Monthly Pay", ylab = "Total Pay")
+
+```
+
+### Inbound
+
+```{r fig.width = 12, fig.height = 9}
+grid.arrange(r1, r2, r3, r4, nrow = 2, ncol = 2)
+```
+
+### Outbound
+
+```{r fig.width = 12, fig.height = 9}
+grid.arrange(r5, r6, r7, r8, nrow = 2, ncol = 2)
 ```
 
 ## Seasonal Naive
 
-For the outbound series, as they have roughly constant variation and could be explained using an additive model, we can use a seasonal naive forecasting method for a short term predictions.
+### Inbound
+```{r fig.width=12, fig.height=9}
+s1 <- autoplot(snaive(inbound_summary_monthly_hrs_ts, h = 24), main = "Inbound, Total Hours per Month", ylab = "Total Hours")
 
-```{r}
+s2 <- autoplot(snaive(inbound_summary_monthly_pay_ts, h = 24), main = "Inbound, Total Pay per Month", ylab = "Total Pay")
 
-OB_monthly_hrs_seas_adj <- outbound_summary_monthly_hrs_ts - outbound_monthly_decomp_hrs$seasonal
-OB_monthly_pay_seas_adj <- outbound_summary_monthly_pay_ts - outbound_monthly_decomp_pay$seasonal
-
-OB_monthly_hrs_snaive <- snaive(OB_monthly_hrs_seas_adj[,1], h=24, level=95)
-plot(OB_monthly_hrs_snaive)
-
-OB_monthly_pay_snaive <- snaive(OB_monthly_pay_seas_adj[,1], h=24, level=95)
-plot(OB_monthly_pay_snaive)
+grid.arrange(s1, s2, nrow = 2)
 ```
 
-## Random Walk without Drift
-
+### Outbound
 ```{r}
+s3 <- autoplot(snaive(outbound_summary_monthly_hrs_ts, h = 24), main = "Outbound, Total Hours per Month", ylab = "Total Hours")
 
-OB_monthly_hrs_seas_adj <- outbound_summary_monthly_hrs_ts - outbound_monthly_decomp_hrs$seasonal
-OB_monthly_pay_seas_adj <- outbound_summary_monthly_pay_ts - outbound_monthly_decomp_pay$seasonal
+s4 <- autoplot(snaive(outbound_summary_monthly_pay_ts, h = 24), main = "Outbound, Total Pay per Month", ylab = "Total Pay")
 
-OB_monthly_hrs_RWF <- rwf(OB_monthly_hrs_seas_adj[,1], h=24, drift=F, level=90,95)
-plot(OB_monthly_hrs_RWF)
-
-OB_monthly_pay_RWF <- rwf(OB_monthly_pay_seas_adj[,1], h=24, drift=F, level=90,95)
-plot(OB_monthly_pay_RWF)
+grid.arrange(s3, s4, nrow = 2)
 ```
-
-## Random Walk with Drift
-
-For the outbound series, as they have roughly constant variation and could be explained using an additive model, we can use a random walk forecasting method for a short term predictions.
-
-```{r}
-
-OB_monthly_hrs_seas_adj <- outbound_summary_monthly_hrs_ts - outbound_monthly_decomp_hrs$seasonal
-OB_monthly_pay_seas_adj <- outbound_summary_monthly_pay_ts - outbound_monthly_decomp_pay$seasonal
-
-OB_monthly_hrs_RWF_drift <- rwf(OB_monthly_hrs_seas_adj[,1], h=24, drift=T, level=90,95)
-plot(OB_monthly_hrs_RWF_drift)
-
-OB_monthly_pay_RWF_drift <- rwf(OB_monthly_pay_seas_adj[,1], h=24, drift=T, level=90,95)
-plot(OB_monthly_pay_RWF_drift)
-```
-
 
 ## Exponential Smoothing
 
-## Holt-Winters
+### Holt-Winters
 #### Inbound
 
 Based on the decompositions from above, for the inbound series, we will need use the Holt-Winters seasonal *additive* method.
 
 ```{r}
-# Monthly
 # Hours
-
 inbound_monthly_hrs_HW <- hw(inbound_summary_monthly_hrs_ts, seasonal = "additive")
-plot(inbound_monthly_hrs_HW)
-```
+hw1 <- autoplot(inbound_monthly_hrs_HW, main = "Holt-Winters Forecast, Inbound Monthly Hours", ylab = "Total Hours")
 
-```{r}
-# Pay
-inbound_monthly_pay_HoltWinters <- hw(inbound_summary_monthly_pay_ts, seasonal = "additive")
-plot(inbound_monthly_pay_HoltWinters)
+inbound_weekly_hrs_HoltWinters <- HoltWinters(inbound_summary_weekly_hrs_ts)
+hw3 <- autoplot(forecast(inbound_weekly_hrs_HoltWinters), main = "Holt-Winters Forecast, Inbound Weekly Hours", ylab = "Total Hours")
+
+grid.arrange(hw1, hw3, nrow = 2)
 ```
 
 Based on the Holt-Winters forecast for our monthly series, both our inbound hours and pay are expected to continue to increase heavily through 2018.
 
 ```{r}
-# Weekly
-# Hours
-inbound_weekly_hrs_HoltWinters <- HoltWinters(inbound_summary_weekly_hrs_ts)
-plot(forecast(inbound_weekly_hrs_HoltWinters))
-```
 
-```{r}
+inbound_monthly_pay_HoltWinters <- hw(inbound_summary_monthly_pay_ts, seasonal = "additive")
+hw2 <- autoplot(inbound_monthly_pay_HoltWinters, main = "Holt-Winters Forecast, Inbound Monthly Pay", ylab = "Total Pay")
+
 # Pay
 inbound_weekly_pay_HoltWinters <- HoltWinters(inbound_summary_weekly_pay_ts)
-plot(forecast(inbound_weekly_pay_HoltWinters))
+hw4 <- autoplot(forecast(inbound_weekly_pay_HoltWinters), main = "Holt-Winters Forecast, Inbound Weekly Pay", ylab = "Total Pay")
+
+grid.arrange(hw2, hw4, nrow = 2)
 ```
 
 Our Holt-Winters forecasts for the weekly series appear to be lower than those for the monthly series, and they do not increase as dramatically moving into 2018. We will need to further analyze both the series and the forecasts to determine which is closer to what we should expect moving forward.
 
-## Holt-Winters
 #### Outbound
 
 For the outbound series, we will need use the Holt-Winters seasonal *multiplicative* method.
@@ -510,13 +477,13 @@ For the outbound series, we will need use the Holt-Winters seasonal *multiplicat
 # Hours
 
 outbound_monthly_hrs_HW <- hw(outbound_summary_monthly_hrs_ts, seasonal = "multiplicative")
-plot(outbound_monthly_hrs_HW)
-```
+hw5 <- autoplot(outbound_monthly_hrs_HW, main = "Holt-Winters Forecast, Outbound Monthly Hours", ylab = "Total Hours")
 
-```{r}
 # Pay
 outbound_monthly_pay_HoltWinters <- hw(outbound_summary_monthly_pay_ts, seasonal = "multiplicative")
-plot(outbound_monthly_pay_HoltWinters)
+hw6 <- autoplot(outbound_monthly_pay_HoltWinters, main = "Holt-Winters Forecast, Outbound Monthly Pay", ylab = "Total Pay")
+
+grid.arrange(hw5, hw6, nrow = 2)
 ```
 
 The `hw` function cannot handle a series with frequency greater than 24 (in a two year period), so we cannot forecast the weekly series using the multiplicative method.
@@ -545,76 +512,65 @@ The `hw` function cannot handle a series with frequency greater than 24 (in a tw
 
 ## ARIMA
 
-We can sometimes create better forecasts by utilizing ARIMA models. Since the mean is not quite stationary, we can take the first difference we computed. 
+We can sometimes create better forecasts by utilizing ARIMA models. 
+
+#### Inbound
+
+```{r evaluate = FALSE, include = FALSE}
+adf.test(inbound_summary_monthly_hrs_ts)
+adf.test(inbound_summary_monthly_pay_ts)
+adf.test(inbound_summary_weekly_hrs_ts)
+adf.test(inbound_summary_weekly_pay_ts)
+```
+
+From the Dickey-Fuller test, we can confirm that the weekly pay series is stationary, while the weekly hours and both monthly are not. We apply some differencing below:
 
 ```{r }
 #Montly Hours
-plot.ts(inbound_summary_monthly_hrs_ts)
+df1 <- autoplot(inbound_summary_monthly_hrs_ts, main = "Inbound Hours per Month", ylab = "Total Hours")
 inbound_summary_monthly_hrs_ts_Diff <- diff(inbound_summary_monthly_hrs_ts)
-plot.ts(inbound_summary_monthly_hrs_ts_Diff)
+df2 <- autoplot(inbound_summary_monthly_hrs_ts_Diff, main = "Inbound Hours per Month, Difference = 1", ylab = "Total Hours")
 
 inbound_summary_monthly_hrs_ts2 <- diff(inbound_summary_monthly_hrs_ts, differences = 2)
-plot.ts(inbound_summary_monthly_hrs_ts2)
+df3 <- autoplot(inbound_summary_monthly_hrs_ts2, main = "Inbound Hours per Month, Difference = 2", ylab = "Total Hours")
 
-acf2(inbound_summary_monthly_hrs_ts, max.lag = 20)
+grid.arrange(df1, df2, df3, nrow = 3)
+```
 
+A difference of 2 appears to make the monthly hours series stationary, and we find that this is the case for the monthly pay and weekly hours series as well. We can then begin to build our ARIMA models. We will use the `auto.arima` function that will choose the best ARIMA model to fit to each series.
 
+```{r}
 inbound_summary_monthly_hrs_ts_ARIMA <- auto.arima(inbound_summary_monthly_hrs_ts)
 inbound_summary_monthly_hrs_ts_forecast <- forecast(inbound_summary_monthly_hrs_ts_ARIMA)
-plot(inbound_summary_monthly_hrs_ts_forecast)
-
-```
-#Monthly Pay
-```{r}
-plot.ts(inbound_summary_monthly_pay_ts)
-inbound_summary_monthly_pay_ts_Diff <- diff(inbound_summary_monthly_pay_ts)
-plot.ts(inbound_summary_monthly_pay_ts_Diff)
-
-inbound_summary_monthly_pay_ts2 <- diff(inbound_summary_monthly_pay_ts, differences = 2)
-plot.ts(inbound_summary_monthly_pay_ts2)
-
-acf2(inbound_summary_monthly_pay_ts, max.lag = 20)
-
-inbound_summary_monthly_pay_ts_ARIMA <- auto.arima(inbound_summary_monthly_pay_ts)
-inbound_summary_monthly_pay_ts_forecast <- forecast(inbound_summary_monthly_pay_ts_ARIMA)
-plot(inbound_summary_monthly_pay_ts_forecast)
-
-```
-#Weekly Hours
-```{r}
-plot.ts(inbound_summary_weekly_hrs_ts)
-inbound_summary_weekly_hrs_ts_Diff <- diff(inbound_summary_weekly_hrs_ts)
-plot.ts(inbound_summary_weekly_hrs_ts_Diff)
-
-inbound_summary_weekly_hrs_ts2 <- diff(inbound_summary_weekly_hrs_ts, differences = 2)
-plot.ts(inbound_summary_weekly_hrs_ts2)
-
-acf2(inbound_summary_weekly_hrs_ts, max.lag = 20)
+a1 <- autoplot(inbound_summary_monthly_hrs_ts_forecast, main = "ARIMA Forecast, Inbound Monthly Hours", ylab = "Total Hours")
 
 inbound_summary_weekly_hrs_ts_ARIMA <- auto.arima(inbound_summary_weekly_hrs_ts)
 inbound_summary_weekly_hrs_ts_forecast <- forecast(inbound_summary_weekly_hrs_ts_ARIMA)
-plot(inbound_summary_weekly_hrs_ts_forecast)
+a3 <- autoplot(inbound_summary_weekly_hrs_ts_forecast, main = "ARIMA Forecast, Inbound Weekly Hours", ylab = "Total Hours")
+
+
+grid.arrange(a1, a3, nrow = 2)
+
 ```
-#Weekly Pay
+
 ```{r}
-plot.ts(inbound_summary_weekly_pay_ts)
-inbound_summary_weekly_pay_ts_Diff <- diff(inbound_summary_weekly_pay_ts)
-plot.ts(inbound_summary_monthly_pay_ts)
-
-inbound_summary_weekly_pay_ts2 <- diff(inbound_summary_weekly_pay_ts, differences = 2)
-plot.ts(inbound_summary_weekly_pay_ts2)
-
-acf2(inbound_summary_weekly_pay_ts, max.lag = 20)
+inbound_summary_monthly_pay_ts_ARIMA <- auto.arima(inbound_summary_monthly_pay_ts)
+inbound_summary_monthly_pay_ts_forecast <- forecast(inbound_summary_monthly_pay_ts_ARIMA)
+a2 <- autoplot(inbound_summary_monthly_pay_ts_forecast, main = "ARIMA Forecast, Inbound Monthly Pay", ylab = "Total Pay")
 
 inbound_summary_weekly_pay_ts_ARIMA <- auto.arima(inbound_summary_weekly_pay_ts)
 inbound_summary_weekly_ts_forecast <- forecast(inbound_summary_weekly_pay_ts_ARIMA)
-plot(inbound_summary_weekly_ts_forecast)
+a4 <- autoplot(inbound_summary_weekly_ts_forecast, main = "ARIMA Forecast, Inbound Weekly Pay", ylab = "Total Pay")
+
+grid.arrange(a2, a4, nrow = 2)
 
 ```
 
-Next we can use ARIMA to forecast our outbound series.
+#### Outbound
 
-```{r}
+Next we will use ARIMA to forecast our outbound series.
+
+```{r evaluate = FALSE, include = FALSE}
 
 acf(outbound_summary_monthly_hrs_ts)
 acf(outbound_summary_monthly_pay_ts)
@@ -623,17 +579,16 @@ acf(outbound_summary_weekly_pay_ts)
 
 ```
 
-<!-- # ```{r} -->
-<!-- # adf.test(outbound_summary_monthly_hrs_ts) -->
-<!-- # adf.test(outbound_summary_monthly_pay_ts) -->
-<!-- # adf.test(outbound_summary_weekly_hrs_ts) -->
-<!-- # adf.test(outbound_summary_weekly_pay_ts) -->
-<!-- # ``` -->
+```{r evaluate = FALSE, include = FALSE}
+ adf.test(outbound_summary_monthly_hrs_ts)
+ adf.test(outbound_summary_monthly_pay_ts)
+ adf.test(outbound_summary_weekly_hrs_ts)
+ adf.test(outbound_summary_weekly_pay_ts)
+```
 
+From the Dickey-Fuller test, we can confirm that the weekly series are stationary, while the monthly are not. We again find that both the monthly hours and pay series can achieve stationarity after two differences.
 
-From the Dickey-Fuller test, we can confirm that the weekly series are stationary, while the monthly are not. We apply some differencing below:
-
-```{r}
+```{r include = FALSE}
 
 outbound_monthly_hrs_diff1 <- diff(outbound_summary_monthly_hrs_ts, differences = 1)
 adf.test(outbound_monthly_hrs_diff1)
@@ -643,9 +598,9 @@ adf.test(outbound_monthly_hrs_diff2)
 
 ```
 
-The monthly hours series achieves stationarity after two differences. We can see below that this is the same for the monthly pay series as well.
+<!-- The monthly hours series achieves stationarity after two differences. We can see below that this is the same for the monthly pay series as well. -->
 
-```{r}
+```{r include = FALSE}
 
 outbound_monthly_pay_diff1 <- diff(outbound_summary_monthly_pay_ts, differences = 1)
 adf.test(outbound_monthly_pay_diff1)
@@ -655,20 +610,27 @@ adf.test(outbound_monthly_pay_diff2)
 
 ```
 
-We can use the `auto.arima` as it will find the appropriate ARIMA model for us to use with each series.
+Again we will use `auto.arima` to fit the models.
 
 ```{r}
 # Outbound ARIMA Models
 monthly_hours <- auto.arima(outbound_summary_monthly_hrs_ts)
-plot(forecast(monthly_hours))
-
-monthly_pay <- auto.arima(outbound_summary_monthly_pay_ts)
-plot(forecast(monthly_pay))
+a5 <- autoplot(forecast(monthly_hours), main = "ARIMA Forecast, Outbound Monthly Hours", ylab = "Total Hours")
 
 weekly_hours <- auto.arima(outbound_summary_weekly_hrs_ts)
-plot(forecast(weekly_hours))
+a7 <- autoplot(forecast(weekly_hours), main = "ARIMA Forecast, Outbound Weekly Hours", ylab = "Total Hours")
+
+grid.arrange(a5, a7, nrow = 2)
+```
+
+```{r}
+monthly_pay <- auto.arima(outbound_summary_monthly_pay_ts)
+a6 <- autoplot(forecast(monthly_pay), main = "ARIMA Forecast, Outbound Monthly Pay", ylab = "Total Pay")
 
 weekly_pay <- auto.arima(outbound_summary_weekly_pay_ts)
-plot(forecast(weekly_pay))
+a8 <- autoplot(forecast(weekly_pay), main = "ARIMA Forecast, Outbound Weekly Pay", ylab = "Total Pay")
 
+grid.arrange(a6, a8, nrow = 2)
 ```
+
+# Conclusion
