@@ -367,6 +367,20 @@ grid.arrange(d9,d10,d11,d12, nrow = 2, ncol = 2)
 
 Again, the variation in the random component of the weekly outbound series does not appear to be constant, so we will need to use a multiplicative decomposition for this series.
 
+## Comparing Trends
+
+Here we compare the trend components of the different series.
+
+```{r}
+
+plot(decompose(inbound_summary_monthly_hrs_ts)$trend, ylim = c(0,20000), col = "green", type = "p", main = "Total Hours per Month, Inbound vs Outbound Trend", sub = "Red Line - Outbound, Green Dot - Inbound", ylab = "Total Hours");  lines(decompose(outbound_summary_monthly_hrs_ts)$trend, col = "red")
+```
+
+```{r}
+plot(decompose(outbound_summary_monthly_pay_ts)$trend, ylim = c(2000, 125000), col = "green", type = "p", main = "Total Pay per Month, Inbound vs Outbound Trend", sub = "Red Line - Outbound, Green Dot - Inbound", ylab = "Total Pay");
+lines(decompose(inbound_summary_monthly_pay_ts)$trend, col = "red")
+```
+
 #Forecasting
 
 ## Mean
@@ -631,6 +645,26 @@ weekly_pay <- auto.arima(outbound_summary_weekly_pay_ts)
 a8 <- autoplot(forecast(weekly_pay), main = "ARIMA Forecast, Outbound Weekly Pay", ylab = "Total Pay")
 
 grid.arrange(a6, a8, nrow = 2)
+```
+
+# Model Evaluation
+
+```{r}
+# Inbound Monthly Hours
+ib_mon_hrs_cv_rw <- tsCV(inbound_summary_monthly_hrs_ts, rwf, h = 24, drift = F)
+ib_mon_hrs_cv_rwd <- tsCV(inbound_summary_monthly_hrs_ts, rwf, h = 24, drift = T)
+ib_mon_hrs_cv_snaive <- tsCV(inbound_summary_monthly_hrs_ts, snaive, h = 24)
+ib_mon_hrs_cv_meanf <- tsCV(inbound_summary_monthly_hrs_ts, meanf, h = 24)
+ib_mon_hrs_cv_hw <- tsCV(inbound_summary_monthly_hrs_ts, hw, seasonal = "additive")
+
+# MSE
+mean(ib_mon_hrs_cv_meanf^2, na.rm = T); mean(ib_mon_hrs_cv_rw^2, na.rm = T); mean(ib_mon_hrs_cv_rwd^2, na.rm = T); mean(ib_mon_hrs_cv_snaive^2, na.rm = T); mean(ib_mon_hrs_cv_hw^2, na.rm = T)
+
+# MAE
+mean(abs(ib_mon_hrs_cv_meanf), na.rm = T); mean(abs(ib_mon_hrs_cv_rw), na.rm = T); mean(abs(ib_mon_hrs_cv_rwd), na.rm = T); mean(abs(ib_mon_hrs_cv_snaive), na.rm = T); mean(abs(ib_mon_hrs_cv_hw), na.rm = T)
+
+# Residuals
+checkresiduals(inbound_summary_monthly_hrs_ts_ARIMA)
 ```
 
 # Conclusion
