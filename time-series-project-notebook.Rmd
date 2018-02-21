@@ -570,16 +570,21 @@ checkresiduals(inbound_summary_monthly_hrs_ts_ARIMA)
 
 
 
+\  
 
-<div class="blank"></div> 
-<div class="blank"></div> 
-<div class="blank"></div>
-<div class="blank"></div> 
-<div class="blank"></div> 
-<div class="blank"></div>
-<div class="blank"></div> 
-<div class="blank"></div> 
-<div class="blank"></div>
+\  
+
+\  
+
+\  
+
+\  
+
+\  
+
+\  
+
+\  
 
 # Appendix
 ## Analysis of Weekly Data
