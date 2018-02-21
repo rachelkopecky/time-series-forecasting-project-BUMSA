@@ -27,7 +27,7 @@ knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 #   Load Required Packages and Files  
 #   Check that necessary packages are installed
 
-packages <- c("tidyverse", "lubridate", "forecast", "tibbletime", "ggplot2", "ggthemes", "stringr", "gridExtra", "fpp", "astsa")
+packages <- c("tidyverse", "lubridate", "forecast", "tibbletime", "ggplot2", "ggthemes", "stringr", "gridExtra", "fpp", "astsa", "knitr")
 
 new.packages <- packages[!(packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages)
@@ -154,6 +154,7 @@ summary_weekly <- all %>%
 
 ```
 
+The plots below display the total pay and total hours for both inbound and outbound production at three different locations.
 
 ```{r}
 
@@ -190,6 +191,8 @@ p3 <- summary_weekly %>%
 grid.arrange(p1, p2, p3, nrow = 3)
 
 ```
+
+We notice that there is some seasonality in the data, as Q4 of each year appears to see a spike in both inbound and outbound production. We also notice that there is a slight upward trend in the data over time, which is likely due to acquisitions that have taken place over this period. 
 
 ```{r}
 
@@ -228,7 +231,7 @@ grid.arrange(p4, p5, p6, nrow = 3)
 
 ```
 
-It appears that there may be seasonality and trend in both the Inbound and Outbound data. Also, the random fluctuations in the data do not appear to be constant over time, so we may need to use a multiplicative decomposition model to describe this series.
+As there is incomplete data for the *RW* and *IC Finance-Lou locations*, for the analysis that follows we are going to focus solely on the inbound and outbound data for the ***LOU*** location.
 
 ## Decomposition
 
@@ -319,9 +322,13 @@ plot(decompose(outbound_summary_monthly_pay_ts)$trend, ylim = c(2000, 125000), c
 lines(decompose(inbound_summary_monthly_pay_ts)$trend, col = "red")
 ```
 
+We notice that both the inbound and outbound series have an increasing trend for both total hours and total pay. The outbound series (red) appears to be increasing at a faster rate.
+
 #Forecasting
 
 ## Mean
+
+Although the mean will not provide us with an accurate forecast for these particular series, we began with this method because we wanted to get an understanding of what the forecast would look like if we just take the mean of the historic data.
 
 ```{r fig.width = 12, fig.height = 9}
 
@@ -336,7 +343,11 @@ m4 <- autoplot(meanf(outbound_summary_monthly_pay_ts, h = 24), main = "Outbound,
 grid.arrange(m1, m2, m3, m4, nrow = 2, ncol = 2)
 ```
 
+As expected, these forecasts are not good, as they do not account for any of the seasonality or trend that we have seen in the past.
+
 ## Random Walk 
+
+We then wanted to understand what the forecast would look like if we attempt to predict the *change* that occurs from one period to the next, rather than trying to predict the actual values. This is where Random Walk forecasting comes in. At each time period, the value takes a random step away from its previous position.  
 
 ```{r}
 
@@ -360,13 +371,19 @@ r8 <- autoplot(rwf(outbound_summary_monthly_pay_ts, h = 24, drift = T), main = "
 grid.arrange(r1, r2, r3, r4, nrow = 2, ncol = 2)
 ```
 
+For a Random Walk without drift, the mean of the steps will be zero, while a Ranom Walk with Drift will have a nonzero mean, and will better emphasize any trend that we see in the data.
+
 ### Outbound
 
 ```{r fig.width = 12, fig.height = 9}
 grid.arrange(r5, r6, r7, r8, nrow = 2, ncol = 2)
 ```
 
+The Random Walk without Drift is equivalent to a Naive Forecasting method, which just forecasts a value equal to the last one observed.
+
 ## Seasonal Naive
+
+While a Naive forecasting method forecasts a value equal to the one last observed, a Seasonal Naive method accounts for seasonality in the data by forecasting a value equal to the last value from the same season.
 
 ### Inbound
 ```{r fig.width=12, fig.height=9}
@@ -376,6 +393,8 @@ s2 <- autoplot(snaive(inbound_summary_monthly_pay_ts, h = 24), main = "Inbound, 
 
 grid.arrange(s1, s2, nrow = 2)
 ```
+
+This method provides us with a seasonal forecast without overcompensating for the slight upward trend that we see near the end of 2017, as we will soon see is not the case with some of the other forecasting methods.
 
 ### Outbound
 ```{r}
@@ -388,22 +407,24 @@ grid.arrange(s3, s4, nrow = 2)
 
 ## Holt-Winters Exponential Smoothing
 
-### Inbound
+We also used the Holt-Winters method for exponential smoothing, in order to better identify the patterns in the trend and seasonal components of the data by smoothing out some of the noise.
+
+#### Inbound
 
 Based on the decompositions from above, for the inbound series, we will need use the Holt-Winters seasonal *additive* method.
 
 ```{r}
 # Hours
-inbound_monthly_hrs_HW <- hw(inbound_summary_monthly_hrs_ts, seasonal = "additive")
-hw1 <- autoplot(inbound_monthly_hrs_HW, main = "Holt-Winters Forecast, Inbound Monthly Hours", ylab = "Total Hours")
+inbound_monthly_hrs_HW <- HoltWinters(inbound_summary_monthly_hrs_ts, seasonal = "additive")
+hw1 <- autoplot(forecast(inbound_monthly_hrs_HW, h = 24), main = "Holt-Winters Forecast, Inbound Monthly Hours", ylab = "Total Hours")
 
-inbound_monthly_pay_HoltWinters <- hw(inbound_summary_monthly_pay_ts, seasonal = "additive")
-hw2 <- autoplot(inbound_monthly_pay_HoltWinters, main = "Holt-Winters Forecast, Inbound Monthly Pay", ylab = "Total Pay")
+inbound_monthly_pay_HoltWinters <- HoltWinters(inbound_summary_monthly_pay_ts, seasonal = "additive")
+hw2 <- autoplot(forecast(inbound_monthly_pay_HoltWinters, h = 24), main = "Holt-Winters Forecast, Inbound Monthly Pay", ylab = "Total Pay")
 
 grid.arrange(hw1, hw2, nrow = 2)
 ```
 
-Based on the Holt-Winters forecast for our monthly series, both our inbound hours and pay are expected to continue to increase heavily through 2018.
+Based on the Holt-Winters forecast for our monthly series, both our inbound hours and pay are expected to continue to increase heavily through 2018. These forecasts seem to really capitalize on the upward trend that we see toward the end of 2017, which may not lend an accurate forecast.
 
 #### Outbound
 
@@ -413,16 +434,17 @@ For the outbound series, we will need use the Holt-Winters seasonal *multiplicat
 # Monthly
 # Hours
 
-outbound_monthly_hrs_HW <- hw(outbound_summary_monthly_hrs_ts, seasonal = "multiplicative")
-hw5 <- autoplot(outbound_monthly_hrs_HW, main = "Holt-Winters Forecast, Outbound Monthly Hours", ylab = "Total Hours")
+outbound_monthly_hrs_HW <- HoltWinters(outbound_summary_monthly_hrs_ts, seasonal = "multiplicative")
+hw5 <- autoplot(forecast(outbound_monthly_hrs_HW, h = 24), main = "Holt-Winters Forecast, Outbound Monthly Hours", ylab = "Total Hours")
 
 # Pay
-outbound_monthly_pay_HoltWinters <- hw(outbound_summary_monthly_pay_ts, seasonal = "multiplicative")
-hw6 <- autoplot(outbound_monthly_pay_HoltWinters, main = "Holt-Winters Forecast, Outbound Monthly Pay", ylab = "Total Pay")
+outbound_monthly_pay_HoltWinters <- HoltWinters(outbound_summary_monthly_pay_ts, seasonal = "multiplicative")
+hw6 <- autoplot(forecast(outbound_monthly_pay_HoltWinters, h = 24), main = "Holt-Winters Forecast, Outbound Monthly Pay", ylab = "Total Pay")
 
 grid.arrange(hw5, hw6, nrow = 2)
 ```
 
+The forecasts for the outbound series do not appear to provide as drastic of a forecast, as the forecast seems to more closely match the patterns that we have noticed from 2015 to 2017.
 
 <!-- Next we should test if our models are stationary, whether or not autocorrelation exists. If they are non-stationary, then we could possibly improve them using a different technique. -->
 
@@ -531,16 +553,22 @@ Again we will use `auto.arima` to fit the models.
 
 ```{r}
 # Outbound ARIMA Models
-monthly_hours <- auto.arima(outbound_summary_monthly_hrs_ts)
-a5 <- autoplot(forecast(monthly_hours), main = "ARIMA Forecast, Outbound Monthly Hours", ylab = "Total Hours")
+outbound_summary_monthly_hrs_ts_ARIMA <- auto.arima(outbound_summary_monthly_hrs_ts)
+a5 <- autoplot(forecast(outbound_summary_monthly_hrs_ts_ARIMA), main = "ARIMA Forecast, Outbound Monthly Hours", ylab = "Total Hours")
 
-monthly_pay <- auto.arima(outbound_summary_monthly_pay_ts)
-a6 <- autoplot(forecast(monthly_pay), main = "ARIMA Forecast, Outbound Monthly Pay", ylab = "Total Pay")
+outbound_summary_monthly_pay_ts_ARIMA <- auto.arima(outbound_summary_monthly_pay_ts)
+a6 <- autoplot(forecast(outbound_summary_monthly_pay_ts_ARIMA), main = "ARIMA Forecast, Outbound Monthly Pay", ylab = "Total Pay")
 
 grid.arrange(a5, a6, nrow = 2)
 ```
 
 # Model Evaluation
+
+We can evaluate the different models we built by calculating the Mean Squared Error (MSE) and Mean Absolute Error (MAE) for each. The model that best describes the underlying data will minimize both of these errors.
+
+#### Inbound Monthly Hours
+
+##### Mean Squared Error
 
 ```{r}
 # Inbound Monthly Hours
@@ -551,14 +579,100 @@ ib_mon_hrs_cv_meanf <- tsCV(inbound_summary_monthly_hrs_ts, meanf, h = 24)
 ib_mon_hrs_cv_hw <- tsCV(inbound_summary_monthly_hrs_ts, hw, seasonal = "additive")
 
 # MSE
-mean(ib_mon_hrs_cv_meanf^2, na.rm = T); mean(ib_mon_hrs_cv_rw^2, na.rm = T); mean(ib_mon_hrs_cv_rwd^2, na.rm = T); mean(ib_mon_hrs_cv_snaive^2, na.rm = T); mean(ib_mon_hrs_cv_hw^2, na.rm = T)
+mse1 <- mean(ib_mon_hrs_cv_meanf^2, na.rm = T); mse2 <- mean(ib_mon_hrs_cv_rw^2, na.rm = T); mse3 <- mean(ib_mon_hrs_cv_rwd^2, na.rm = T); mse4 <- mean(ib_mon_hrs_cv_snaive^2, na.rm = T); mse5 <- mean(ib_mon_hrs_cv_hw^2, na.rm = T)
+
+Method <- c("Mean Forecasting", "Random Walk", "Random Walk with Drift", "Seasonal Naive", "Holt-Winters")
+MSE <- c(mse1, mse2, mse3, mse4, mse5)
+table1 <- data.frame(Method, MSE)
+kable(table1, align = c('r', 'r', 'r'))
+```
+
+##### Mean Absolute Error
+
+```{r}
+# MAE
+mae1 <- mean(abs(ib_mon_hrs_cv_meanf), na.rm = T); mae2 <- mean(abs(ib_mon_hrs_cv_rw), na.rm = T); mae3 <- mean(abs(ib_mon_hrs_cv_rwd), na.rm = T); mae4 <- mean(abs(ib_mon_hrs_cv_snaive), na.rm = T); mae5 <- mean(abs(ib_mon_hrs_cv_hw), na.rm = T)
+
+MAE <- c(mae1, mae2, mae3, mae4, mae5)
+table2 <- data.frame(Method, MAE)
+kable(table2, align = c('r', 'r', 'r'))
+```
+
+For the inbound monthly hours series, both the MSE and MAE are minimized under the Holt-Winters method. 
+
+We can evaluate the ARIMA models by analyzing the residuals. From the residual analysis below, we can see that our ARIMA model for this series has relatively normally distributed, indepent residuals.
+
+```{r}
+# Residuals
+checkresiduals(inbound_summary_monthly_hrs_ts_ARIMA, test = FALSE)
+```
+
+```{r include = FALSE}
+# Inbound Monthly Pay
+ib_mon_pay_cv_rw <- tsCV(inbound_summary_monthly_pay_ts, rwf, h = 24, drift = F)
+ib_mon_pay_cv_rwd <- tsCV(inbound_summary_monthly_pay_ts, rwf, h = 24, drift = T)
+ib_mon_pay_cv_snaive <- tsCV(inbound_summary_monthly_pay_ts, snaive, h = 24)
+ib_mon_pay_cv_meanf <- tsCV(inbound_summary_monthly_pay_ts, meanf, h = 24)
+ib_mon_pay_cv_hw <- tsCV(inbound_summary_monthly_pay_ts, hw, seasonal = "additive")
+
+# MSE
+mean(ib_mon_pay_cv_meanf^2, na.rm = T); mean(ib_mon_pay_cv_rw^2, na.rm = T); mean(ib_mon_pay_cv_rwd^2, na.rm = T); mean(ib_mon_pay_cv_snaive^2, na.rm = T); mean(ib_mon_pay_cv_hw^2, na.rm = T)
 
 # MAE
-mean(abs(ib_mon_hrs_cv_meanf), na.rm = T); mean(abs(ib_mon_hrs_cv_rw), na.rm = T); mean(abs(ib_mon_hrs_cv_rwd), na.rm = T); mean(abs(ib_mon_hrs_cv_snaive), na.rm = T); mean(abs(ib_mon_hrs_cv_hw), na.rm = T)
+mean(abs(ib_mon_pay_cv_meanf), na.rm = T); mean(abs(ib_mon_pay_cv_rw), na.rm = T); mean(abs(ib_mon_pay_cv_rwd), na.rm = T); mean(abs(ib_mon_pay_cv_snaive), na.rm = T); mean(abs(ib_mon_pay_cv_hw), na.rm = T)
 
 # Residuals
-checkresiduals(inbound_summary_monthly_hrs_ts_ARIMA)
+checkresiduals(inbound_summary_monthly_pay_ts_ARIMA)
 ```
+
+```{r include = FALSE}
+# Outbound Monthly Hours
+ob_mon_hrs_cv_rw <- tsCV(outbound_summary_monthly_hrs_ts, rwf, h = 24, drift = F)
+ob_mon_hrs_cv_rwd <- tsCV(outbound_summary_monthly_hrs_ts, rwf, h = 24, drift = T)
+ob_mon_hrs_cv_snaive <- tsCV(outbound_summary_monthly_hrs_ts, snaive, h = 24)
+ob_mon_hrs_cv_meanf <- tsCV(outbound_summary_monthly_hrs_ts, meanf, h = 24)
+ob_mon_hrs_cv_hw <- tsCV(outbound_summary_monthly_hrs_ts, hw, seasonal = "additive")
+
+# MSE
+mean(ob_mon_hrs_cv_meanf^2, na.rm = T); mean(ob_mon_hrs_cv_rw^2, na.rm = T); mean(ob_mon_hrs_cv_rwd^2, na.rm = T); mean(ob_mon_hrs_cv_snaive^2, na.rm = T); mean(ob_mon_hrs_cv_hw^2, na.rm = T)
+
+# MAE
+mean(abs(ob_mon_hrs_cv_meanf), na.rm = T); mean(abs(ob_mon_hrs_cv_rw), na.rm = T); mean(abs(ob_mon_hrs_cv_rwd), na.rm = T); mean(abs(ob_mon_hrs_cv_snaive), na.rm = T); mean(abs(ob_mon_hrs_cv_hw), na.rm = T)
+
+# Residuals
+checkresiduals(outbound_summary_monthly_hrs_ts_ARIMA)
+```
+
+```{r include = FALSE}
+# Outbound Monthly Pay
+ob_mon_pay_cv_rw <- tsCV(outbound_summary_monthly_pay_ts, rwf, h = 24, drift = F)
+ob_mon_pay_cv_rwd <- tsCV(outbound_summary_monthly_pay_ts, rwf, h = 24, drift = T)
+ob_mon_pay_cv_snaive <- tsCV(outbound_summary_monthly_pay_ts, snaive, h = 24)
+ob_mon_pay_cv_meanf <- tsCV(outbound_summary_monthly_pay_ts, meanf, h = 24)
+ob_mon_pay_cv_hw <- tsCV(outbound_summary_monthly_pay_ts, hw, seasonal = "additive")
+
+# MSE
+mean(ob_mon_pay_cv_meanf^2, na.rm = T); mean(ob_mon_pay_cv_rw^2, na.rm = T); mean(ob_mon_pay_cv_rwd^2, na.rm = T); mean(ob_mon_pay_cv_snaive^2, na.rm = T); mean(ob_mon_pay_cv_hw^2, na.rm = T)
+
+# MAE
+mean(abs(ob_mon_pay_cv_meanf), na.rm = T); mean(abs(ob_mon_pay_cv_rw), na.rm = T); mean(abs(ob_mon_pay_cv_rwd), na.rm = T); mean(abs(ob_mon_pay_cv_snaive), na.rm = T); mean(abs(ob_mon_pay_cv_hw), na.rm = T)
+
+# Residuals
+checkresiduals(outbound_summary_monthly_pay_ts_ARIMA)
+```
+
+Each of our ARIMA models have relatively normally distributed, independent residuals, and the chart below displays the modeling method that minimizes the MSE and MAE for each series:
+
+```{r}
+Series <- c("Inbound Monthly Hours", "Inbound Monthly Pay", "Outbound Monthly Hours", "Outbound Monthly Pay")
+MSE <- c("Holt-Winters", "Holt-Winters", "Random Walk with Drift", "Random Walk with Drift")
+MAE <- c("Holt-Winters", "Holt-Winters", "Random Walk with Drift", "Holt-Winters")
+
+table3 <- data.frame(Series, MSE, MAE)
+
+kable(table3, align = c('r', 'c', 'c'))
+```
+
 
 # Conclusion
 
@@ -587,8 +701,11 @@ checkresiduals(inbound_summary_monthly_hrs_ts_ARIMA)
 \  
 
 # Appendix
+
 ## Analysis of Weekly Data
+
 ### Decomposition
+
 #### Outbound
 
 ```{r fig.width = 10}
@@ -661,6 +778,7 @@ Again, the variation in the random component of the weekly outbound series does 
 ### Forecasting
 
 #### Holt-Winters Exponential Smoothing
+
 ##### Inbound
 
 ```{r}
@@ -691,8 +809,11 @@ hw8 <- autoplot(forecast(outbound_weekly_pay_HoltWinters), main = "Holt-Winters 
 grid.arrange(hw7, hw8, nrow = 2)
 
 ```
+
 #### ARIMA
+
 ##### Inbound
+
 ```{r}
 adf.test(inbound_summary_weekly_hrs_ts)
 adf.test(inbound_summary_weekly_pay_ts)
@@ -712,6 +833,7 @@ a4 <- autoplot(inbound_summary_weekly_ts_forecast, main = "ARIMA Forecast, Inbou
 grid.arrange(a3, a4, nrow = 2)
 
 ```
+
 ##### Outbound
 
 Next we will use ARIMA to forecast our outbound series.
