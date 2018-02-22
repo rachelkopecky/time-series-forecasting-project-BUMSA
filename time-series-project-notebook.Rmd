@@ -45,15 +45,16 @@ sapply(packages, library, character.only = TRUE)
 
 *Approach* 
 
-* Analyze the inbound and outbound loads at the main warehouse 
-* Mainly look at a monthly view but also potentially dive down to days of the week to better understand staffing at micro level 
-* While inbound and outbound are highly(?) correlated, there are some differences that could potentially be used to save on resource costs 
+* Analyze the inbound and outbound workloads at the main warehouses for Client A to determine the trend and seasonality
+* Review at a monthly level over the time period but potentially go to a weekly level if more granularity is necessary
+* Compare the inbound and outbound information to look for possible correlations and lag
+* Use the analysis of the historical loads to provide a forecast of staffing needs and costs for the next two years 
 
  
 *Goals* 
 
-* Allow better management and staffing practices to increase productivity and reduce costs 
-* Increase the bottom line 
+* Allow better management and staffing practices to increase productivity and reduce costs
+* Increase the bottom line through proper staffing especially of temporary employees 
 
 
 # Exploration
@@ -600,7 +601,7 @@ kable(table2, align = c('r', 'r', 'r'))
 
 For the inbound monthly hours series, both the MSE and MAE are minimized under the Holt-Winters method. 
 
-We can evaluate the ARIMA models by analyzing the residuals. From the residual analysis below, we can see that our ARIMA model for this series has relatively normally distributed, indepent residuals.
+We can evaluate the ARIMA models by analyzing the residuals. From the residual analysis below, we can see that our ARIMA model for this series has relatively normally distributed, independent residuals.
 
 ```{r}
 # Residuals
@@ -675,6 +676,9 @@ kable(table3, align = c('r', 'c', 'c'))
 
 
 # Conclusion
+While this process provided valuable insight, a deeper dive into the data would be beneficial to further understand the staffing needs for the client. As a result of acquisitions during the second half of 2017, there is a large increase in the trend compared to the prior 2 years. It is unknown at this point, due to lack of data, if this trend will continue or level-off to become a new “norm” for the client’s yearly load.
+
+Also, aggregating all the information up to the department (inbound vs outbound) removes some critical details. Initial thoughts on next steps are to review the breakdown of jobs/tasks performed as well as the employee type. This level of information could provide valuable knowledge on keys areas of inefficiency and allow a cost-benefit analysis on increased staffing via temporary employees versus overtime pay for current employees.
 
 
 
