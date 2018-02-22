@@ -1,6 +1,5 @@
 ---
 title: "Operational Workforce Forecasting"
-date: 2018-02-18
 author: "Paul Forst, Tammy Hang, Rachel Kopecky, Jack Letcher, Ian O'Connor"
 output:
   html_document:
@@ -37,25 +36,30 @@ sapply(packages, library, character.only = TRUE)
 ```
 
 
-# Problem Definition
+# Introduction
 
-* Help forecast staffing needs based on the growth and seasonal trends of the client 
-* Understand the potential demands that client sales/clearances have on traffic 
+As a warehouse and fulfillment center that works with retail clients, the work load can be very seasonal and also impacted by major sale and clearance events. In order to efficiently staff for these periods of increased volume, they need to understand how prior year's performance and trend can help budget for future periods. This could potentially guide finance as well as operation teams with a clearer direction for the 2018-2019 financial and workforce budgets. 
 
 
-*Approach* 
+### Approach 
 
-* Analyze the inbound and outbound workloads at the main warehouses for Client A to determine the trend and seasonality
-* Review at a monthly level over the time period but potentially go to a weekly level if more granularity is necessary
-* Compare the inbound and outbound information to look for possible correlations and lag
+* Analyze the inbound and outbound workloads at the main warehouses for Client A to determine the trend and seasonality 
+
+* Review at a monthly level over the time period but potentially go to a weekly level if more granularity is necessary 
+
+* Compare the inbound and outbound information to look for possible correlations and lag 
+
 * Use the analysis of the historical loads to provide a forecast of staffing needs and costs for the next two years 
 
  
-*Goals* 
+### Goals 
 
-* Allow better management and staffing practices to increase productivity and reduce costs
+* Allow better management and staffing practices to increase productivity and reduce costs 
+
 * Increase the bottom line through proper staffing especially of temporary employees 
 
+### Data
+The dataset contains details of the inbound and outbound operational data from multiple fulfillment centers in the local area over the period *2001-01-01* through *2017-12-31*. Important fields within the dataset include the date of work, warehouse location, department, task, hours spent and wage paid. 
 
 # Exploration
 
@@ -155,7 +159,7 @@ summary_weekly <- all %>%
 
 ```
 
-The plots below display the total pay and total hours for both inbound and outbound production at three different locations.
+The plots below display the total pay and total hours for both inbound and outbound fulfillment at three different locations.
 
 ```{r}
 
@@ -193,7 +197,7 @@ grid.arrange(p1, p2, p3, nrow = 3)
 
 ```
 
-We notice that there is some seasonality in the data, as Q4 of each year appears to see a spike in both inbound and outbound production. We also notice that there is a slight upward trend in the data over time, which is likely due to acquisitions that have taken place over this period. 
+We notice that there is some seasonality in the data, as Q4 of each year appears to see a spike in both inbound and outbound fulfillment. We also notice that there is a slight upward trend in the data over time, which is likely due to acquisitions that have taken place over this period. 
 
 ```{r}
 
