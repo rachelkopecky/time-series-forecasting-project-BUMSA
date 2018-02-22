@@ -313,22 +313,6 @@ grid.arrange(d5, d6, d7, d8, nrow = 2, ncol = 2)
 
 The variation in the random component of the monthly outbound series does not appear to be constant, so we will need to use a multiplicative decomposition for this series.
 
-## Comparing Trends
-
-Here we compare the trend components of the different series.
-
-```{r fig.width=10}
-
-plot(decompose(inbound_summary_monthly_hrs_ts)$trend, ylim = c(0,20000), col = "green", type = "p", main = "Total Hours per Month, Inbound vs Outbound Trend", sub = "Red Line - Outbound, Green Dot - Inbound", ylab = "Total Hours");  lines(decompose(outbound_summary_monthly_hrs_ts)$trend, col = "red")
-```
-
-```{r fig.width=10}
-plot(decompose(outbound_summary_monthly_pay_ts)$trend, ylim = c(2000, 125000), col = "green", type = "p", main = "Total Pay per Month, Inbound vs Outbound Trend", sub = "Red Line - Outbound, Green Dot - Inbound", ylab = "Total Pay");
-lines(decompose(inbound_summary_monthly_pay_ts)$trend, col = "red")
-```
-
-We notice that both the inbound and outbound series have an increasing trend for both total hours and total pay. The outbound series (red) appears to be increasing at a faster rate.
-
 #Forecasting
 
 ## Mean
