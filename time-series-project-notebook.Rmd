@@ -676,9 +676,11 @@ kable(table3, align = c('r', 'c', 'c'))
 
 
 # Conclusion
-While this process provided valuable insight, a deeper dive into the data would be beneficial to further understand the staffing needs for the client. As a result of acquisitions during the second half of 2017, there is a large increase in the trend compared to the prior 2 years. It is unknown at this point, due to lack of data, if this trend will continue or level-off to become a new “norm” for the client’s yearly load.
+While this process provided valuable insight, a deeper dive into the data would be beneficial to further understand the staffing needs for the client. As a result of acquisitions during the second half of 2017, there is a large increase in the trend compared to the prior 2 years. It is unknown at this point, due to lack of data, if this trend will continue or level-off to become a new “norm” for the client’s yearly load. 
 
 Also, aggregating all the information up to the department (inbound vs outbound) removes some critical details. Initial thoughts on next steps are to review the breakdown of jobs/tasks performed as well as the employee type. This level of information could provide valuable knowledge on keys areas of inefficiency and allow a cost-benefit analysis on increased staffing via temporary employees versus overtime pay for current employees.
+
+If a forecast is desired at this time, we would recommend the Seasonal Naive approach for it's more conservative estimate that will reduce the impact of the recent acquisitions. While the Holt-Winters method performed better based solely on the evaluation criteria, we think that it is overly aggressive because of the increased trend at the tail-end of our data.
 
 
 
