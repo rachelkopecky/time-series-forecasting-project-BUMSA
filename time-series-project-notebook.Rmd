@@ -383,7 +383,7 @@ The Random Walk without Drift is equivalent to a Naive Forecasting method, which
 
 ## Seasonal Naive
 
-While a Naive forecasting method forecasts a value equal to the one last observed, a Seasonal Naive method accounts for seasonality in the data by forecasting a value equal to the last value from the same season.
+While a Naive forecasting method forecasts a value equal to the one last observed, a Seasonal Naive method accounts for seasonality in the data by forecasting a value equal to the last value from the same season. As we saw in the decomp above, the variation in the seasonal component was relatively constant, so this method would provide us a forecast that expects that trend to continue.
 
 ### Inbound
 ```{r fig.width=12, fig.height=9}
@@ -411,7 +411,7 @@ We also used the Holt-Winters method for exponential smoothing, in order to bett
 
 #### Inbound
 
-Based on the decompositions from above, for the inbound series, we will need use the Holt-Winters seasonal *additive* method.
+Based on the decompositions from above, for the inbound series, we will need use the Holt-Winters seasonal *additive* method, as the variation in the seasonal component of the series appear to be constant.
 
 ```{r}
 # Hours
@@ -428,23 +428,23 @@ Based on the Holt-Winters forecast for our monthly series, both our inbound hour
 
 #### Outbound
 
-For the outbound series, we will need use the Holt-Winters seasonal *multiplicative* method.
+The variation in the seasonal component of the outbound series were relatively constant as well, so we will again use the *additive* method.
 
 ```{r}
 # Monthly
 # Hours
 
-outbound_monthly_hrs_HW <- HoltWinters(outbound_summary_monthly_hrs_ts, seasonal = "multiplicative")
+outbound_monthly_hrs_HW <- HoltWinters(outbound_summary_monthly_hrs_ts, seasonal = "additive")
 hw5 <- autoplot(forecast(outbound_monthly_hrs_HW, h = 24), main = "Holt-Winters Forecast, Outbound Monthly Hours", ylab = "Total Hours")
 
 # Pay
-outbound_monthly_pay_HoltWinters <- HoltWinters(outbound_summary_monthly_pay_ts, seasonal = "multiplicative")
+outbound_monthly_pay_HoltWinters <- HoltWinters(outbound_summary_monthly_pay_ts, seasonal = "additive")
 hw6 <- autoplot(forecast(outbound_monthly_pay_HoltWinters, h = 24), main = "Holt-Winters Forecast, Outbound Monthly Pay", ylab = "Total Pay")
 
 grid.arrange(hw5, hw6, nrow = 2)
 ```
 
-The forecasts for the outbound series do not appear to provide as drastic of a forecast, as the forecast seems to more closely match the patterns that we have noticed from 2015 to 2017.
+The forecasts for the outbound series do not appear to provide as drastic of a forecast, as the forecast seems to more closely match the patterns that we have noticed from 2015 to 2017. However, it does still capitalize on the increase in trend at the end of 2017.
 
 <!-- Next we should test if our models are stationary, whether or not autocorrelation exists. If they are non-stationary, then we could possibly improve them using a different technique. -->
 
