@@ -59,7 +59,7 @@ As a warehouse and fulfillment center that works with retail clients, the work l
 * Increase the bottom line through proper staffing especially of temporary employees 
 
 ### Data
-The dataset contains details of the inbound and outbound operational data from multiple fulfillment centers in the local area over the period *2001-01-01* through *2017-12-31*. Important fields within the dataset include the date of work, warehouse location, department, task, hours spent and wage paid. 
+The dataset contains details of the inbound and outbound operational data from multiple fulfillment centers in the local area over the period *2015-01-01* through *2017-12-31*. Important fields within the dataset include the date of work, warehouse location, department, task, hours spent and wage paid. 
 
 # Exploration
 
@@ -277,7 +277,7 @@ After looking at the decomposition of the monthly inbound series for both hours 
 
 
 ### Outbound
-```{r fig.width = 12, fig.height = 9}
+```{r fig.width = 10, fig.height = 9}
 
 #Need to decompose and plot
 #Start with monthly inbound data at the LOU location
@@ -317,12 +317,12 @@ The variation in the random component of the monthly outbound series does not ap
 
 Here we compare the trend components of the different series.
 
-```{r}
+```{r fig.width=10}
 
 plot(decompose(inbound_summary_monthly_hrs_ts)$trend, ylim = c(0,20000), col = "green", type = "p", main = "Total Hours per Month, Inbound vs Outbound Trend", sub = "Red Line - Outbound, Green Dot - Inbound", ylab = "Total Hours");  lines(decompose(outbound_summary_monthly_hrs_ts)$trend, col = "red")
 ```
 
-```{r}
+```{r fig.width=10}
 plot(decompose(outbound_summary_monthly_pay_ts)$trend, ylim = c(2000, 125000), col = "green", type = "p", main = "Total Pay per Month, Inbound vs Outbound Trend", sub = "Red Line - Outbound, Green Dot - Inbound", ylab = "Total Pay");
 lines(decompose(inbound_summary_monthly_pay_ts)$trend, col = "red")
 ```
@@ -335,7 +335,7 @@ We notice that both the inbound and outbound series have an increasing trend for
 
 Although the mean will not provide us with an accurate forecast for these particular series, we began with this method because we wanted to get an understanding of what the forecast would look like if we just take the mean of the historic data.
 
-```{r fig.width = 12, fig.height = 9}
+```{r fig.width = 10, fig.height = 9}
 
 m1 <- autoplot(meanf(inbound_summary_monthly_hrs_ts, h = 24), main = "Inbound, Total Hours per Month", ylab = "Total Hours")
 
@@ -372,7 +372,7 @@ r8 <- autoplot(rwf(outbound_summary_monthly_pay_ts, h = 24, drift = T), main = "
 
 ### Inbound
 
-```{r fig.width = 12, fig.height = 9}
+```{r fig.width = 10, fig.height = 9}
 grid.arrange(r1, r2, r3, r4, nrow = 2, ncol = 2)
 ```
 
@@ -380,7 +380,7 @@ For a Random Walk without drift, the mean of the steps will be zero, while a Ran
 
 ### Outbound
 
-```{r fig.width = 12, fig.height = 9}
+```{r fig.width = 10, fig.height = 9}
 grid.arrange(r5, r6, r7, r8, nrow = 2, ncol = 2)
 ```
 
@@ -391,7 +391,7 @@ The Random Walk without Drift is equivalent to a Naive Forecasting method, which
 While a Naive forecasting method forecasts a value equal to the one last observed, a Seasonal Naive method accounts for seasonality in the data by forecasting a value equal to the last value from the same season. As we saw in the decomp above, the variation in the seasonal component was relatively constant, so this method would provide us a forecast that expects that trend to continue.
 
 ### Inbound
-```{r fig.width=12, fig.height=9}
+```{r fig.width=10, fig.height=9}
 s1 <- autoplot(snaive(inbound_summary_monthly_hrs_ts, h = 24), main = "Inbound, Total Hours per Month", ylab = "Total Hours")
 
 s2 <- autoplot(snaive(inbound_summary_monthly_pay_ts, h = 24), main = "Inbound, Total Pay per Month", ylab = "Total Pay")
@@ -402,7 +402,7 @@ grid.arrange(s1, s2, nrow = 2)
 This method provides us with a seasonal forecast without overcompensating for the slight upward trend that we see near the end of 2017, as we will soon see is not the case with some of the other forecasting methods.
 
 ### Outbound
-```{r}
+```{r fig.width = 10, fig.height=9}
 s3 <- autoplot(snaive(outbound_summary_monthly_hrs_ts, h = 24), main = "Outbound, Total Hours per Month", ylab = "Total Hours")
 
 s4 <- autoplot(snaive(outbound_summary_monthly_pay_ts, h = 24), main = "Outbound, Total Pay per Month", ylab = "Total Pay")
@@ -418,7 +418,7 @@ We also used the Holt-Winters method for exponential smoothing, in order to bett
 
 Based on the decompositions from above, for the inbound series, we will need use the Holt-Winters seasonal *additive* method, as the variation in the seasonal component of the series appear to be constant.
 
-```{r}
+```{r fig.width = 10, fig.height=9}
 # Hours
 inbound_monthly_hrs_HW <- HoltWinters(inbound_summary_monthly_hrs_ts, seasonal = "additive")
 hw1 <- autoplot(forecast(inbound_monthly_hrs_HW, h = 24), main = "Holt-Winters Forecast, Inbound Monthly Hours", ylab = "Total Hours")
@@ -435,7 +435,7 @@ Based on the Holt-Winters forecast for our monthly series, both our inbound hour
 
 The variation in the seasonal component of the outbound series were relatively constant as well, so we will again use the *additive* method.
 
-```{r}
+```{r fig.width = 10, fig.height=9}
 # Monthly
 # Hours
 
@@ -487,7 +487,7 @@ adf.test(inbound_summary_monthly_pay_ts)
 
 From the Dickey-Fuller test, we can confirm that neither of the monthly series are stationary. We apply some differencing below:
 
-```{r }
+```{r fig.width = 10}
 #Montly Hours
 df1 <- autoplot(inbound_summary_monthly_hrs_ts, main = "Inbound Hours per Month", ylab = "Total Hours")
 inbound_summary_monthly_hrs_ts_Diff <- diff(inbound_summary_monthly_hrs_ts)
@@ -501,7 +501,7 @@ grid.arrange(df1, df2, df3, nrow = 3)
 
 A difference of 2 appears to make the monthly hours series stationary, and we find that this is the case for the monthly pay series as well. We can then begin to build our ARIMA models. We will use the `auto.arima` function that will choose the best ARIMA model to fit to each series.
 
-```{r}
+```{r fig.width = 10}
 inbound_summary_monthly_hrs_ts_ARIMA <- auto.arima(inbound_summary_monthly_hrs_ts)
 inbound_summary_monthly_hrs_ts_forecast <- forecast(inbound_summary_monthly_hrs_ts_ARIMA)
 a1 <- autoplot(inbound_summary_monthly_hrs_ts_forecast, main = "ARIMA Forecast, Inbound Monthly Hours", ylab = "Total Hours")
@@ -556,7 +556,7 @@ adf.test(outbound_monthly_pay_diff2)
 
 Again we will use `auto.arima` to fit the models.
 
-```{r}
+```{r fig.width = 10}
 # Outbound ARIMA Models
 outbound_summary_monthly_hrs_ts_ARIMA <- auto.arima(outbound_summary_monthly_hrs_ts)
 a5 <- autoplot(forecast(outbound_summary_monthly_hrs_ts_ARIMA), main = "ARIMA Forecast, Outbound Monthly Hours", ylab = "Total Hours")
@@ -605,9 +605,7 @@ kable(table2, align = c('r', 'r', 'r'))
 
 For the inbound monthly hours series, both the MSE and MAE are minimized under the Holt-Winters method. 
 
-We can evaluate the ARIMA models by analyzing the residuals. From the residual analysis below, we can see that our ARIMA model for this series has relatively normally distributed, independent residuals.
-
-```{r}
+```{r include = FALSE}
 # Residuals
 checkresiduals(inbound_summary_monthly_hrs_ts_ARIMA, test = FALSE)
 ```
@@ -666,7 +664,9 @@ mean(abs(ob_mon_pay_cv_meanf), na.rm = T); mean(abs(ob_mon_pay_cv_rw), na.rm = T
 checkresiduals(outbound_summary_monthly_pay_ts_ARIMA)
 ```
 
-Each of our ARIMA models have relatively normally distributed, independent residuals, and the chart below displays the modeling method that minimizes the MSE and MAE for each series:
+#### Overall
+
+The table below displays the modeling method that minimizes MSE and MAE for each series:
 
 ```{r}
 Series <- c("Inbound Monthly Hours", "Inbound Monthly Pay", "Outbound Monthly Hours", "Outbound Monthly Pay")
@@ -678,9 +678,11 @@ table3 <- data.frame(Series, MSE, MAE)
 kable(table3, align = c('r', 'c', 'c'))
 ```
 
+We evaluated the ARIMA models by analyzing the residuals, and found that each of our ARIMA models have relatively normally distributed, independent residuals.
 
 # Conclusion
-While this process provided valuable insight, a deeper dive into the data would be beneficial to further understand the staffing needs for the client. As a result of acquisitions during the second half of 2017, there is a large increase in the trend compared to the prior 2 years. It is unknown at this point, due to lack of data, if this trend will continue or level-off to become a new “norm” for the client’s yearly load. 
+
+While this process provided valuable insight, a deeper dive into the data would be beneficial to further understand the staffing needs for the client. As a result of acquisitions during the second half of 2017, there is a large increase in the trend compared to the prior 2 years. It is unknown at this point, due to lack of data, if this trend will continue or level-off to become a new "norm" for the client's yearly load. 
 
 Also, aggregating all the information up to the department (inbound vs outbound) removes some critical details. Initial thoughts on next steps are to review the breakdown of jobs/tasks performed as well as the employee type. This level of information could provide valuable knowledge on keys areas of inefficiency and allow a cost-benefit analysis on increased staffing via temporary employees versus overtime pay for current employees.
 
